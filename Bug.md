@@ -1,7 +1,7 @@
-## Bug Fix — Modal Not Opening
+# Bug Fix — Checkbox Status Not Showing
 ## Task
 
-Fix the bug where clicking the button should show the modal.
+Fix the bug so that checking the checkbox updates the message.
 
 ## Buggy Code
 ``` html
@@ -9,12 +9,12 @@ Fix the bug where clicking the button should show the modal.
 <html>
 <body>
 
-<div id="modal" style="display:none;background:#eee;padding:20px;">Modal Content</div>
-<button id="open">Open Modal</button>
+<input type="checkbox" id="check">
+<p id="status"></p>
 
 <script>
-document.getElementById("open").addEventListener("click", function(){
-    document.getelementById("modal").style.display = "block";
+document.getElementById("check").addEventListener("change", () => {
+    status.innerHTML = check.checked ? "Checked" : "Uncheckedx";
 });
 </script>
 
