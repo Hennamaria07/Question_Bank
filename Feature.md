@@ -1,24 +1,44 @@
-# Project Description
+# Project Requirement — Collapsible Sidebar Navigation
 
-Create a collapsible sidebar navigation menu using a single self-contained HTML file (with embedded CSS and JavaScript). The sidebar must:
+Create a **single self-contained HTML file** (with CSS and JavaScript embedded inside it) that implements a **fixed collapsible sidebar navigation menu**. The sidebar must meet the following requirements:
 
-* Start collapsed at **5rem** width showing only icons.
-* Expand to **18rem** width when hovered or clicked.
-* Be **fixed** on the left side of the page.
-* Use purple background **#2A00B2**.
-* Include a logo that switches between collapsed and expanded versions.
-* Support smooth transitions and slide-right animations.
-* Contain 4 parent sections: **Dashboard, Operations, Settings, Reports**.
-* Each parent must have submenu items that:
+## Sidebar Behavior
 
-  * Display alphabetically when the parent is clicked.
-  * Show hover effects (text color changes from gray **#A3A3A3** to white).
-  * Use static hardcoded data.
-* Only one parent section may be active at a time.
-* A close button must appear when expanded.
-* Sidebar must collapse when the mouse leaves or the close button is clicked.
+* The sidebar starts in a **collapsed** state with a width of **5rem**, showing only icons.
+* When the user **hovers** over the sidebar or **clicks** it, the sidebar expands to **18rem**.
+* The sidebar must remain **fixed** on the left side of the screen.
+* When expanded, it should show:
 
-## Required Static Menu Structure & URLs
+  * A larger version of the logo.
+  * A **close button**. Clicking the close button collapses the sidebar.
+* The sidebar must **automatically collapse** when the mouse leaves the sidebar area.
+* All transitions (opening/closing) should be smooth.
+* Submenu items should appear with a **slide-right animation**.
+
+## Design Requirements
+
+* Background color: **#2A00B2** (purple)
+* Text color default: **#A3A3A3** (gray)
+* On hover, text color changes to **white**.
+* Use smooth animations for expanding/collapsing and submenu sliding.
+* Use two logo versions: one for collapsed sidebar, one for expanded sidebar.
+
+## Menu Structure
+
+The sidebar contains four main sections:
+
+* **Dashboard**
+* **Operations**
+* **Settings**
+* **Reports**
+
+Each section contains submenu items that must be **hardcoded** and must open **alphabetically sorted** when the parent section is clicked.
+
+### Only one section is allowed to be open at a time.
+
+Clicking on a new section must close the previously opened one.
+
+## Required Submenu Items and URLs
 
 Base URL: `http://127.0.0.1:5500/`
 
@@ -48,14 +68,11 @@ Base URL: `http://127.0.0.1:5500/`
 * Vehicle Report → `/reports/vehicle-report.html`
 * Employee Report → `/reports/employee-report.html`
 
-## Output Requirement
+## Final Output Requirement
 
-Produce the entire solution as a **single standalone HTML file** containing:
+Produce the complete working solution as a **single standalone HTML file** that includes:
 
-* Internal CSS
-* Internal JavaScript
-* Hardcoded menu data
-* Complete working collapsible sidebar as described above.
-
-## Image
-<img />
+* Internal **CSS** (no external files)
+* Internal **JavaScript** (no external files)
+* Hardcoded menu structure
+* Fully functional collapsible sidebar with animations as described above.
