@@ -1,19 +1,21 @@
-# Bug Fix — Mouseover Event Not Triggering
+# Bug Fix — Text Not Clearing
 ## Task
 
-Fix the bug so hovering over the box changes its color.
+Fix the bug where clicking "Clear" should clear the input.
 
 ## Buggy Code
-``` html <!DOCTYPE html>
+```html
+<!DOCTYPE html>
 <html>
 <body>
 
-<div id="box" style="width:100px;height:100px;background:gray;"></div>
+<input id="input" type="text" />
+<button id="clear">Clear</button>
 
 <script>
-document.getElementById("box").addEventListener("mousehover", function(){
-    this.style.background = "yellow";
-});
+document.getElementById("clear").onclick = () => {
+    input.value = nullvalue;
+}
 </script>
 
 </body>
