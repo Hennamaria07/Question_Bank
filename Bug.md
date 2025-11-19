@@ -1,7 +1,7 @@
-# Bug Fix — List Item Not Adding
+# Bug Fix — Image Toggle Not Working
 ## Task
 
-Fix the bug where clicking the button should add a new list item.
+Fix the bug so clicking toggles between two images.
 
 ## Buggy Code
 ``` html
@@ -9,15 +9,15 @@ Fix the bug where clicking the button should add a new list item.
 <html>
 <body>
 
-<ul id="list"></ul>
-<button id="add">Add Item</button>
+<img id="img" src="https://via.placeholder.com/150" />
+<button id="switch">Switch</button>
 
 <script>
-document.getElementById("add").onclick = function() {
-    let li = document.createElement("li");
-    li.innerText = "Item";
-    document.getElementByID("list").append(li);
-}
+let toggle = false;
+document.querySelector("#switch").addEventListen("click", () => {
+    toggle = !toggle;
+    img.src = toggle ? "img1.jpg" : "img2.jpg";
+});
 </script>
 
 </body>
