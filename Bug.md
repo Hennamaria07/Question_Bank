@@ -1,7 +1,7 @@
-# Bug Fix — Checkbox Status Not Showing
+# Bug Fix — List Item Not Adding
 ## Task
 
-Fix the bug so that checking the checkbox updates the message.
+Fix the bug where clicking the button should add a new list item.
 
 ## Buggy Code
 ``` html
@@ -9,13 +9,15 @@ Fix the bug so that checking the checkbox updates the message.
 <html>
 <body>
 
-<input type="checkbox" id="check">
-<p id="status"></p>
+<ul id="list"></ul>
+<button id="add">Add Item</button>
 
 <script>
-document.getElementById("check").addEventListener("change", () => {
-    status.innerHTML = check.checked ? "Checked" : "Uncheckedx";
-});
+document.getElementById("add").onclick = function() {
+    let li = document.createElement("li");
+    li.innerText = "Item";
+    document.getElementByID("list").append(li);
+}
 </script>
 
 </body>

@@ -1,168 +1,266 @@
-# Add Job Order — README
+# Services Management — README
 
-## Goal
 
-Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) that implements an **Add Job Order** page. The page should be responsive and follow the visual style described below (purple-accent, clean layout). The file should use `dayjs` (included inline or via CDN) for date/time formatting and validation.
-
----
-
-## Location & Mode
-
-* The page is for **Add** mode and the URL path will include `/add`.
-* On successful save, navigate back to:
-
-```
-http://127.0.0.1:5500/operations/vehicle-management.html
-```
+Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) implementing a complete **Services Management Component**. The UI must follow a clean, purple-accent theme and remain fully responsive across desktop, mid-width, and mobile layouts.
 
 ---
 
-## Visual Layout
+## Header
 
-* Title at top-left: **Job Order** (font-size: 24px; font-weight: 600; color: #232323; margin-bottom: 25px).
-* Card container styling:
+* Display a clear top-left header: **Services**
 
-  * `margin: 0 50px; padding: 20px; background: #E5E8FF; border-radius: 8px; box-shadow: 0px 4px 4px rgba(0,0,0,0.25)`.
-* Inputs: white background `#FFFFFF`, border `2px solid #D2D5DA`, border-radius consistent, readable font sizes.
-
-### Responsive breakpoints
-
-* Desktop: margin `0 50px`, padding `20px`.
-* Tablets (770–1104px): margin `0 30px`, padding `15px`.
-* Mobile (<768px): single-column layout, margin `0 10px`, padding `10px`.
-* Very small (<480px): reduced font sizes for compactness.
+  * Font size: **24px**
+  * Font weight: **600 / bold**
+  * Color: `#232323`
 
 ---
 
-## Read-only Vehicle & Customer Info (top section)
+## Services Table — Overview
 
-Display these read-only fields populated from localStorage or URL param (vehicleId):
+A responsive table listing all service rows with the following columns:
 
-* Plate No.
-* Vehicle — brand + model (with a car icon)
-* Customer Name
-* Email
-* Primary Contact
-* WhatsApp — **hidden** when empty or only contains country code
-
----
-
-## Job Card Inputs
-
-### Job Card
-
-* Read-only initially showing: **"Will be generated on save"**.
-* On save generate `jobCardId` with format:
-
-  * `JC-NBW-{DDMMYYYY}-{5-digit-sequence}`
-  * Sequence is the next number from the latest stored sequence in localStorage (maintain a counter, e.g., `jobCardSeq_{DDMMYYYY}` or global `jobCardSeq`), zero-padded to 5 digits.
-
-### Arrival Date (required)
-
-* Date picker using `dayjs` format `DD-MM-YYYY`.
-* Default to today's date (set via JS on load).
-* Style: `2px solid #D2D5DA`, border-radius `4px`, height `40px`.
-* Enforce min/max rules via JS as required.
-
-### Estimated Delivery Date (required)
-
-* Dayjs-based date picker with `DD-MM-YYYY` formatting.
-
-### Estimated Delivery Time (required)
-
-* Time picker with `HH:MM AM/PM` format (use a simple select or custom time input).
-
-### Mileage (required)
-
-* Numeric input.
-* On input: strip commas and Arabic numerals (convert Arabic-Indic digits to Western digits), prevent mouse wheel changes.
-* Validate with regex `/^\d*\.?\d{0,2}$/` (up to two decimals).
-* On blur: format with comma separators using `Intl.NumberFormat`.
-
-### Advisor (required)
-
-* Dropdown populated from localStorage `usersData` filtered where `role === 'Advisor'`.
-
-### Status (dropdown)
-
-* Options: Draft, Job Card Created, In-progress, On Hold, Ready for Delivery, Completed, Cancelled.
-* When status is changed to **On Hold** or **Cancelled**, show a conditional **Reason** text input — required for those statuses.
-
-### Comments
-
-* Full-width textarea for optional comments.
+| Column          | Description                                                                                                                                            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Task**        | Async creatable dropdown populated from `serviceTypesData` (localStorage). Supports searching, filtering, and creating new service types when allowed. |
+| **Description** | Auto-filled when a Task is selected. Read-only.                                                                                                        |
+| **Est Hrs**     | Estimated hours (decimal). Read-only, pre-filled from selected service type.                                                                           |
+| **Est Amt**     | Estimated amount (currency). Read-only, formatted with two decimals.                                                                                   |
+| **RT Hrs**      | Regular Time hours, computed from timesheets. Read-only.                                                                                               |
+| **OT Hrs**      | Overtime hours, computed. Read-only.                                                                                                                   |
+| **Act Hrs**     | Total Actual Hours. Read-only.                                                                                                                         |
+| **Act Amt**     | Editable actual amount. Validates two decimals and formats on blur.                                                                                    |
+| **Action**      | Delete icon. May be disabled if restrictions apply.                                                                                                    |
 
 ---
 
-## Date/Time Handling
+## Task Selector (Async Creatable Dropdown)
 
-* Use `dayjs` for formatting and parsing dates/times.
-* Display and parse `DD-MM-YYYY` for dates and `hh:mm A` for times.
+* Loads **service types** from `localStorage` key: `serviceTypesData`.
+* Must support:
 
----
-
-## Validation & UX Details
-
-* Show inline validation messages and toasts for summary errors.
-* Disable mouse wheel on numeric fields to prevent accidental changes.
-* Ensure WhatsApp field hides if value is empty or only a country code.
-* Provide accessible form labels and `aria-*` attributes.
+  * Typing to filter options asynchronously.
+  * Excluding already-selected service types.
+  * Displaying **“No services found”** when empty.
+  * Allowing creation of new service types.
+  * Triggering the **Create New Service Modal** when user clicks *Create new service: 'X'*.
 
 ---
 
-## Toast Notifications
+## Create New Service Modal
 
-* Appear top-center.
-* Auto-dismiss after 3s.
-* Use different styles for success (green) and error (red) with clear messages.
+A modal (max width 600px) containing:
+
+* **Service Name** (required)
+* **Description** (required)
+* **Estimated Hours**
+
+  * Accept **hours + minutes**
+  * Convert to decimal internally
+* **Estimated Amount** (required, currency)
+
+### Modal Behavior
+
+* Validate all fields.
+* Save the new service to `localStorage` → key: `serviceTypesData`.
+* Add the new service to the dropdown list.
+* Auto-select this new service in the row that created it.
+* Show success/error toasts.
 
 ---
 
-## Error Handling
+## Row Behavior
 
-* Wrap localStorage interactions in `try/catch` blocks.
-* Show appropriate error toasts with actionable messages (e.g., "Failed to save job order — please try again").
-
----
-
-## Sample localStorage Keys & Data Shape
-
-* `usersData` — array of user objects (used to populate Advisor dropdown):
-
-```js
-[ { id: 'U1', name: 'Anees', role: 'Advisor' }, ... ]
-```
-
-* `jobOrderData_{vehicleId}` — array of saved job orders for a vehicle. Example object:
+Each service row is represented internally as:
 
 ```js
 {
-  jobCardId: 'JC-NBW-05112025-00001',
-  vehicleId: 'VH1001',
-  plateNo: 'KL-07-AB-1234',
-  advisor: 'Anees',
-  arrivalDate: '05-11-2025',
-  estDeliveryDate: '07-11-2025',
-  estDeliveryTime: '10:30 AM',
-  mileage: '12,345.00',
-  status: 'Draft',
-  comments: '',
-  createdAt: '2025-11-05T08:00:00.000Z',
-  jobCardLive: true
+  serviceType: '',
+  serviceDescription: '',
+  serviceApproxHrs: 0,
+  serviceApproxCost: 0,
+  serviceActualCost: 0,
+  serviceActualHrs: 0,
+  isNewService: false,
+  hasUserChanged: false,
+  modifiedFields: []
 }
 ```
 
-* `jobCardSeq` or `jobCardSeq_{DDMMYYYY}` — sequence counters for jobCardId generation.
+### When user selects a Task:
+
+* Auto-fill:
+
+  * Description
+  * Estimated Hours (decimal)
+  * Estimated Amount (currency)
+
+### When user edits Actual Amount:
+
+* Validate up to **two decimals**
+* Reformat using `Intl.NumberFormat` on blur
+
+### RT/OT/Actual Hours
+
+* Compute using timesheet data from:
+
+  * `timesheetsData_{jobCardId}`
+* Ignore timesheets where `currentStatus === "REJECTED"`.
+
+### Add/Delete Rows
+
+* **Add Row** — Clicking the **+** icon (only shown on last row). Adds an empty row.
+* **Delete Row** — Clicking Delete icon (trash).
+
+  * Block deletion if:
+    * Any actual hours > 0
+  * Blocked delete shows tooltip explaining why.
+  * Otherwise show confirmation dialog.
 
 ---
 
-## Accessibility
+## Totals Section
 
-* Use semantic HTML elements and labels.
-* Ensure focus order, keyboard navigation, and `aria` attributes for dynamic elements and toasts.
+At the bottom of the table, show readonly totals:
 
+* Total **Estimated Hours**
+* Total **RT Hours**
+* Total **OT Hours**
+* Total **Actual Hours**
+* Total **Actual Amount** (formatted currency)
+
+Totals update **live** whenever the services array changes.
+
+---
+
+## Autosave (Important)
+
+All edits must update an autosave object in localStorage:
+
+```
+autoSaveJobOrder_{vehicleId}_{userId}
+```
+
+Autosave must:
+
+* Use debounced updates
+* Include create/edit/delete logic
+* Log actions to console for debugging
+* Use try/catch and show toast errors when failing
+
+---
+
+## Initialization Logic
+
+When component loads:
+
+1. Show a **centered spinner** while loading.
+2. Load:
+
+   * `serviceTypesData`
+   * `servicesData_{jobCardId}` (if edit mode)
+   * `timesheetsData_{jobCardId}`
+3. If no saved services exist → start with **one empty row**.
+4. Detect Add vs Edit mode from URL.
+
+---
+
+## Responsive Layout
+
+### Desktop (≥1024px)
+
+* Full table header visible
+* Traditional row layout
+
+### Mid-width (770–1024px)
+
+* Two-column grid layout for each row
+
+### Mobile (<768px)
+
+* Stack fields with **data-labels**
+* Hide table header entirely
+* Full-width rows
+
+---
+
+## Utility Functions
+
+Include these helper functions:
+
+* Convert decimal hours ↔ HH:MM
+* Format currency via `Intl.NumberFormat`
+* Calculate totals from service array
+* Deep clone objects
+
+---
+
+## Toast System
+
+* Success toast (green)
+* Error toast (red)
+* Auto-dismiss after 3 seconds
+* Positioned at top-center
+
+---
+
+## Data Dependencies (LocalStorage)
+
+### `serviceTypesData`
+
+List of service types:
+
+```js
+[
+  {
+    id: "SVC001",
+    name: "Oil Change",
+    description: "Engine oil replacement",
+    estHrs: 1.0,
+    estAmt: 150.00
+  },
+  {
+    id: "SVC002",
+    name: "Break Change",
+    description: "Break replacement",
+    estHrs: 2.0,
+    estAmt: 100.00
+  }
+]
+```
+
+### `servicesData_{jobCardId}`
+
+Array of existing service entries.
+
+### `timesheetsData_{jobCardId}`
+
+Timesheet logs from mechanics/technicians.
+
+### `activeSessionsData_{jobCardId}`
+
+Used to block deletes.
+
+### `autoSaveJobOrder_{vehicleId}_{userId}`
+
+Autosave store.
+
+---
+
+## Output
+
+Produce a **single self-contained HTML file** that includes:
+
+* Header
+* Responsive services table
+* Task selector (async + creatable)
+* New Service modal
+* Row logic & totals logic
+* Autosave logic
+* Dynamic delete rules
+* Toasts
+* Styling (purple theme, clean UI)
 ---
 
 ## Image
-<img src='./assets/Screenshot 2025-11-19 150651.png'>
-<img src='./assets/Screenshot 2025-11-19 150703.png'>
+<img src='./assets/Screenshot 2025-11-19 152335.png'>
+<img src='./assets/Screenshot 2025-11-19 152357.png'>
