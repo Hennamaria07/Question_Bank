@@ -1,20 +1,19 @@
-# Bug Fix — Text Not Appending
+# Bug Fix — Mouseover Event Not Triggering
 ## Task
 
-Fix the bug where clicking the button should append new text inside the paragraph.
+Fix the bug so hovering over the box changes its color.
 
 ## Buggy Code
 ``` html <!DOCTYPE html>
 <html>
 <body>
 
-<p id="para">Start: </p>
-<button id="add">Add Text</button>
+<div id="box" style="width:100px;height:100px;background:gray;"></div>
 
 <script>
-document.getElementById("add").onclick = function() {
-    para.text = para.text + " Added";
-}
+document.getElementById("box").addEventListener("mousehover", function(){
+    this.style.background = "yellow";
+});
 </script>
 
 </body>
