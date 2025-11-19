@@ -76,3 +76,9 @@ Produce the complete working solution as a **single standalone HTML file** that 
 * Internal **JavaScript** (no external files)
 * Hardcoded menu structure
 * Fully functional collapsible sidebar with animations as described above.
+
+## Image
+<img src='./assets/Screenshot 2025-10-13 132248.png'>
+<img src='./assets/Screenshot 2025-10-13 132325.png'>
+<img src='./assets/Screenshot 2025-10-13 132347.png'>
+<img src='./assets/Screenshot 2025-10-13 132408.png'>
