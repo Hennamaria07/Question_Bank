@@ -1,186 +1,141 @@
-# Invoice Preview — README
+# Job History Management
 
-## Goal
-
-Create a **single self-contained HTML file** (HTML + inline CSS + vanilla JavaScript) implementing a **complete Invoice Preview Page**. The page must follow a **clean purple-accent theme**, remain fully responsive across desktop, mid-width, and mobile layouts, and support printing, PDF download, and sharing via WhatsApp.
+Create a **single self-contained HTML file** (HTML + inline CSS + vanilla JavaScript) implementing a **Job History Management Page** that clearly shows a vehicle’s service history. The page must follow a **clean, responsive layout** and provide user-friendly features such as search, filtering, pagination, and PDF generation.
 
 ---
 
 ## Header
 
-* Top-left **Back Arrow Button**  
-  * Hidden when viewing a shared invoice URL  
-* Heading area with page title (optional per design)  
+* Top-left **History** title
+  * Font size: **24px**
+  * Font weight: **bold**
+  * Color: `#333333`
 
 ---
 
-## Invoice Box — Overview
+## Container
 
-A **centered invoice container** (max-width 920px) containing:
-
-1. **Company Header Image**
-   * From `localStorage.config.companyInfo.invoiceHeader`  
-   * Fallback to default logo if missing  
-
-2. **Invoice Title**
-   * Bold, centered: **TAX INVOICE**  
-   * Display **Job Card Number** and **Invoice Date**  
-
-3. **Customer Section**
-   * Pull details from `localStorage.jobCards`, `localStorage.vehicles`, and `config`  
-   * Fields include:
-     * Name, Contact, Address  
-     * Plate Number, Kilometers  
-     * Brand/Model, VIN  
-     * Emirates, TRN  
-     * Insurance/Claim/LPO Numbers  
+* Card-style container:
+  * Margin: `0 30px`
+  * Padding: `20px`
+  * Background: `#E5E8FF`
+  * Border-radius: `8px`
+  * Box-shadow: `0px 4px 4px rgba(0,0,0,0.25)`
 
 ---
 
-## Spare Parts Table
+## Search and Filter
 
-| Column         | Description |
-| -------------- | ----------- |
-| S.No           | Serial number |
-| Part Description | Part name/description |
-| Unit Price     | Price per unit |
-| Qty            | Quantity |
-| Amount         | Unit × Qty |
-| Discount       | Discount amount |
-| Gross Amount   | Amount − Discount |
-| VAT 5%         | Gross × 0.05 |
-| Net Amount     | Gross + VAT |
+* **Search Box**
+  * Full-width, top-right
+  * Matches against Arrival Date, Delivery Date, Total Hours, and Total Amount  
 
-* Data filtered by `jobCardId` from `localStorage.parts`  
-* Calculations performed in JS with **Intl.NumberFormat** (fallback `"en-US"`)  
-* Currency values formatted to two decimals  
+* **Filter Button**
+  * Opens small popover (220px width)
+  * Allows filtering by **Arrival Date** and **Delivery Date**
+  * Includes **RESET** button to clear filters
 
 ---
 
-## Services Table
+## Job History Table
 
-| Column         | Description |
-| -------------- | ----------- |
-| S.No           | Serial number |
-| Work Description | Service description |
-| Unit Price     | Price per unit |
-| Qty            | Quantity |
-| Amount         | Unit × Qty |
-| Discount       | Discount amount |
-| Gross          | Amount − Discount |
-| VAT 5%         | Always 0.00 for services |
-| Net            | Gross + VAT |
-
-* Data from `jobCards[].services` filtered by current job card  
-* Calculations handled similarly to spare parts table  
-
----
-
-## Totals Section
-
-* **Parts Subtotal**  
-* **Services Subtotal**  
-* **Footer Totals**:
-  * Total AED  
-  * Discount AED  
-  * Gross Total  
-  * VAT 5% (for parts only)  
-  * Net Amount  
+* Columns:
+  * Arrival Date
+  * Delivery Date
+  * Total Hours (decimal → HH:MM)
+  * Total Amount (currency, formatted with commas and 2 decimals)
+  * Invoice (PDF button)
+* Header styling:
+  * Background: `#D0D4F2`
+  * Rounded corners
+* Row styling:
+  * Odd rows: `#F7F6FE`
+  * Even rows: `#FFFFFF`
+* Currency formatting:
+  * Use `Intl.NumberFormat` with locale from config or fallback `"en-US"`
+* Date formatting:
+  * Display `DD-MM-YYYY` or use format defined in config
 
 ---
 
-## Payments Summary
+## PDF Button & Modal
 
-* Paid Amount: Sum of `localStorage.payments` filtered by jobCardId  
-* Balance: Net − Paid  
-
----
-
-## Signature Lines
-
-* Customer  
-* Service Advisor  
-
-*Centered "THANK YOU" message beneath signatures*
-
----
-
-## Action Buttons
-
-1. **Print** → calls `window.print()`  
-2. **Download** → generates PDF of invoice area  
-3. **Share** → opens WhatsApp share link to invoice view URL  
-
-*Hide Print/Share buttons when viewing a shared invoice.*
+* Clicking PDF icon opens a modal titled **“Select Invoice Date”**
+  * Options:
+    * Current Date
+    * Delivery Date
+    * Pick a Date → shows date picker
+  * Validates that a date is chosen
+  * On confirm → navigate to `/invoice/{jobCardId}` with selected date in route state
+* If no date selected → show top-center red toast: **“Please select an invoice date.”**
+* Modal behavior:
+  * Close on backdrop click
+  * Close on Escape key
 
 ---
 
-## Responsiveness
+## Pagination
 
-* On narrow screens: tables scroll horizontally, layout stacks  
-* Show **“← Scroll to see more →”** hint under 1000px width  
-* Adjust fonts/padding across breakpoints  
-
----
-
-## Print View
-
-* Hide UI controls and buttons  
-* Optimize invoice layout for paper  
+* Server-like pagination:
+  * Rows per page: 5, 10, 20
+  * Previous / Next navigation
+  * Display line: `"Showing X–Y of Z entries"`
 
 ---
 
 ## Data Handling
 
-* Load data from `localStorage`:
-  * `config`  
-  * `jobCards`  
-  * `vehicles`  
-  * `parts`  
-  * `services`  
-  * `payments`  
-* Fallback defaults if data is missing (empty string or 0.00)  
-* Format dates as `YYYY-MM-DD` (or `config` format if present)  
-* Generate unique IDs using `Date.now()+Math.random()` if needed  
-* Format all currency consistently  
+* Load data from `localStorage.jobHistory`
+* Filter records by `vehicleId`
+* Each record includes:
+  * Job card info
+  * Services
+* Compute:
+  * **Total Hours** = sum of service actual hours → display as HH:MM
+  * **Total Amount** = sum of service actual costs → formatted currency
+* Search & filters:
+  * Search matches against dates and amounts
+  * Date filters match exact Arrival/Delivery Dates
+* Display **No history available** if no records exist
+* Show **centered loading spinner** while fetching
+
+---
+
+## Accessibility & Styling
+
+* All inputs and controls:
+  * Accessible styling
+  * `box-sizing: border-box`
+* Layout is responsive:
+  * Column widths reduce on narrower screens
+  * Header padding shrinks
+  * Table becomes scrollable
 
 ---
 
 ## Error Handling
 
-* Catch errors when accessing localStorage  
-* Show friendly error message with **“Go Back”** button  
+* All localStorage operations wrapped in try/catch
+* Show **user-friendly error messages** via toast notifications
 
 ---
 
-## Loading State
+## Summary of Features
 
-* Display **centered spinner** while fetching data  
-
----
-
-## Calculations
-
-* **Gross, VAT, Net, Totals, Paid, Balance** calculated in JavaScript  
-* Clear, human-readable formatting  
-
----
-
-## Output
-
-Produce a **single self-contained HTML file** that includes:
-
-* Header with back button  
-* Centered invoice box with logo, title, job card info, and customer details  
-* Spare parts table and services table with dynamic calculations  
-* Totals section and payments summary  
-* Signature lines and “THANK YOU” message  
-* Action buttons for Print, Download, Share  
-* Responsive layout and print-friendly view  
-* Loading spinner and error handling  
+* Bold **History** header
+* Card-style container with shadow
+* Responsive job history table with alternating row colors
+* Full-width search and filter popover
+* PDF button with modal to select invoice date
+* Pagination with rows per page selection
+* Total Hours & Amount calculations
+* Loading spinner while fetching data
+* Accessible, responsive, and mobile-friendly layout
+* Robust error handling and toast notifications
 
 
 ## Image
-<img src='./assets/Screenshot 2025-11-19 155833.png'>
-<img src='./assets/Screenshot 2025-11-19 155852.png'>
-<img src='./assets/Screenshot 2025-11-19 155913.png'>
+<img src='./assets/Screenshot 2025-11-19 160950.png'>
+<img src='./assets/Screenshot 2025-11-19 161018.png'>
+<img src='./assets/Screenshot 2025-11-19 161129.png'>
+<img src='./assets/Screenshot 2025-11-19 161155.png'>

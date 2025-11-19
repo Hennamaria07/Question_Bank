@@ -1,7 +1,7 @@
-# Bug Fix — Div Not Moving
+# Bug Fix — Text Not Changing on Dropdown
 ## Task
 
-Fix the bug where the box should move 10px right each time the button is clicked.
+Fix the bug where selecting a color changes the text color.
 
 ## Buggy Code
 ``` html
@@ -9,15 +9,17 @@ Fix the bug where the box should move 10px right each time the button is clicked
 <html>
 <body>
 
-<div id="box" style="width:50px;height:50px;background:red;position:absolute;left:0px;"></div>
-<button id="move">Move</button>
+<select id="color">
+<option value="red">Red</option>
+<option value="blue">Blue</option>
+</select>
+
+<p id="output">Color me</p>
 
 <script>
-let pos = 0;
-document.getElementById("move").onclick = function() {
-    pos = pos + 10;
-    document.getElementByID("box").style.left = pos + "pxs";
-}
+document.getElementByID("color").addEvent("change", () => {
+    output.style.color = this.value;
+});
 </script>
 
 </body>
