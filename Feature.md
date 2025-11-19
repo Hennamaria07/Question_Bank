@@ -44,3 +44,7 @@ Create a **main header bar** that follows the design shown in the reference imag
 * Build **from scratch** using HTML, CSS, and JavaScript.
 * Must match the exact style shown in the reference image.
 * Deliver as a **single standalone HTML file** containing all CSS and JavaScript inline.
+
+## Image
+<img src="./assets/Screenshot 2025-10-13 134422.png">
+<img src="./assets/Screenshot 2025-10-13 134449.png">
