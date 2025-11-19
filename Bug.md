@@ -1,7 +1,7 @@
-# Bug Fix — Image Toggle Not Working
+# Bug Fix — Div Not Moving
 ## Task
 
-Fix the bug so clicking toggles between two images.
+Fix the bug where the box should move 10px right each time the button is clicked.
 
 ## Buggy Code
 ``` html
@@ -9,15 +9,15 @@ Fix the bug so clicking toggles between two images.
 <html>
 <body>
 
-<img id="img" src="https://via.placeholder.com/150" />
-<button id="switch">Switch</button>
+<div id="box" style="width:50px;height:50px;background:red;position:absolute;left:0px;"></div>
+<button id="move">Move</button>
 
 <script>
-let toggle = false;
-document.querySelector("#switch").addEventListen("click", () => {
-    toggle = !toggle;
-    img.src = toggle ? "img1.jpg" : "img2.jpg";
-});
+let pos = 0;
+document.getElementById("move").onclick = function() {
+    pos = pos + 10;
+    document.getElementByID("box").style.left = pos + "pxs";
+}
 </script>
 
 </body>
