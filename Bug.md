@@ -1,21 +1,21 @@
-# Bug Fix — Text Not Clearing
+## Bug Fix — Modal Not Opening
 ## Task
 
-Fix the bug where clicking "Clear" should clear the input.
+Fix the bug where clicking the button should show the modal.
 
 ## Buggy Code
-```html
+``` html
 <!DOCTYPE html>
 <html>
 <body>
 
-<input id="input" type="text" />
-<button id="clear">Clear</button>
+<div id="modal" style="display:none;background:#eee;padding:20px;">Modal Content</div>
+<button id="open">Open Modal</button>
 
 <script>
-document.getElementById("clear").onclick = () => {
-    input.value = nullvalue;
-}
+document.getElementById("open").addEventListener("click", function(){
+    document.getelementById("modal").style.display = "block";
+});
 </script>
 
 </body>

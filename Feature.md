@@ -1,153 +1,166 @@
-# Add Vehicle Form
+# Parts Management Page
 
-## Goal
+## Overview
 
-Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) that implements an **Add Vehicle Form**. The form must be responsive and saved at:
+Build a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) that implements a responsive **Parts Management** page supporting both **Add** and **Edit** modes. The page should be desktop-first but responsive down to small screens, use a purple-accent clean design, and persist data via `localStorage`.
 
+---
+
+## High-level Features
+
+1. Store selector (required) at top-left — searchable, 25% width on desktop, full width on mobile; white background, blue focus.
+2. Responsive Parts Table with:
+
+   * Pale header, rounded corners, alternating row colors.
+   * Each row has:
+
+     * Searchable/creatable **Part** dropdown (loads 50+ hardcoded parts and includes any `customParts` saved to `localStorage`).
+     * Read-only **Description** field populated from part metadata.
+     * Read-only **Supplier** field populated from part metadata (20+ suppliers in sample data).
+     * **Quantity** input (min 1) that auto-calculates **Amount = unitPrice × quantity**.
+     * **Amount** input (editable) that accepts two decimals, reformats on blur, and recalculates unitPrice when edited.
+     * **Delete** button (red).
+   * The last row shows an **Add** button (blue) to append a new empty row.
+   * Table footer shows **Est Total** (read-only), formatted with `Intl.NumberFormat` (commas, two decimals, currency code from config fallback).
+3. **Create New Part** modal (max-width 600px) with fields:
+
+   * Part Name, Part Code, Description, Supplier (dropdown of 20+ suppliers), Price, Qty, Expiry Date.
+   * Validate inputs, compute cost = price × qty, and save as a `customParts` entry in `localStorage`.
+   * Auto-select the newly created part in the current row.
+   * Show success/error toasts.
+4. **Add vs Edit modes**
+
+   * Detect mode via URL (`mode=add` or `mode=edit&jobCardId=...`).
+   * In **Edit mode** show a centered loading spinner while fetching `jobCardParts` from `localStorage`.
+   * Populate rows from saved `jobCardParts` or start with a single empty row if none.
+   * Track deleted row IDs for processing while editing.
+5. Row interactions and validations:
+
+   * Selecting a part fills description, supplier, unitPrice and amount.
+   * Changing quantity recalculates amount.
+   * Editing amount recalculates unitPrice (validated to two decimals) and reformats on blur.
+   * Deleting removes row or resets it if it’s the only row; in Edit mode record deleted IDs.
+6. Save/Update and Cancel buttons:
+
+   * Bottom-centered Save/Update and Cancel.
+   * Validate rows (disallow saving when there are no parts or when required fields are missing).
+   * On save: process `rowsToDelete`, update existing entries, or create new `jobCardParts` in `localStorage` with `createdAt`, `updatedAt`, `userId`, and `active` flags.
+   * Show success toast and keep clear user feedback for create/update/delete.
+7. Accessibility & UX:
+
+   * Accessible modals, keyboard focus, and ARIA attributes.
+   * Toast notifications top-center auto-dismiss.
+   * Custom scrollbars and loading spinners provided.
+
+---
+
+## Data & localStorage Keys
+
+* `parts` — initial hardcoded catalog (50+ parts). Each part object:
+
+```js
+{ id: 'PART001', name: 'Brake Pad', code: 'BP-001', description: 'Front brake pad', supplier: 'Supplier A', unitPrice: 120.50, currency: 'USD', expiry: '2026-12-31' }
 ```
-http://127.0.0.1:5500/app/management/vehicle/add.html
-```
+
+* `suppliers` — list of 20+ supplier names/objects.
+* `customParts` — array of user-created parts added via the Create New Part modal.
+* `jobCardParts` — array/object mapping jobCardId to its saved parts (used in Edit mode). Each saved part includes `id` (local id), `partId` (reference to parts/customParts), `qty`, `unitPrice`, `amount`, `createdAt`, `updatedAt`, `userId`, `active`.
+* `stores` — available stores for the top selector.
+
+The README includes example sample datasets (50 parts, 20 suppliers) embedded in the implementation.
 
 ---
 
-## Layout & Responsiveness
+## UI Details and Behavior
 
-* **Desktop (≥1200px):** two-column grid.
-* **Tablet (≤1200px):** container width 80% and single-column layout.
-* **Mobile (≤728px):** single-column, full-width form groups.
-* **Small devices (≤600px):** country-code dropdown stacks above phone input; buttons wrap under 500px and become full-width under 436px.
-* Page background: `#F1F3F7`.
-* Card background: `#E5E8FF`, shadow `0px 4px 4px rgba(0,0,0,0.25)`, border-radius `10px`.
-* Inputs: white background, border `2px solid #D2D5DA`, font-family Helvetica, focus accent `#1c6ead`.
+### Parts Dropdown
 
----
+* Loads both `parts` and `customParts` and supports typing to filter.
+* If user types a name that does not match, an option `Create new part: '{input}'` appears — clicking it opens the Create New Part modal with the typed name pre-filled.
 
-## Fields
+### Quantity & Amount Logic
 
-**Required unless stated otherwise**
+* Quantity default = 1, min = 1.
+* Amount default = `unitPrice * qty` and displays two decimals.
+* When Amount is edited by the user:
 
-* **Plate No.** (text) — no spaces, max 30, unique across `localStorage.vehicleAccounts` (prevent duplicates).
-* **VIN** (text) — max 30.
-* **Vehicle Brand** (searchable dropdown) — 10+ hardcoded brands sorted alphabetically; creatable (modal). Selecting a brand populates the **Vehicle Model** dropdown.
-* **Vehicle Model** (dropdown) — populated after brand selected; max 30; creatable only when brand chosen.
-* **Owner First Name** (required)
-* **Owner Last Name** (required)
-* **Primary Contact** (country-code dropdown + number input) — required; country-code dropdown with flags for 10 countries (default `+971` UAE); number 9–15 digits; store as `+971-501234567`.
-* **WhatsApp Contact** (country-code + number) — optional; if provided must be 9–15 digits.
-* **Email** (required) — max 50, validate email format.
-* **Company Fleet Name** (optional)
+  * Validate input (allow two decimals), on blur reformat to two decimals.
+  * Recalculate `unitPrice = amount / qty` and store.
+* Est Total is sum of row amounts and updates live when rows change.
 
-### Additional Fields (collapsed accordion)
+### Create New Part Modal
 
-* Model Year
-* Engine Capacity
-* Color
-* Emirates
-* Insurance
-* Claim No
-* LPO No
+* Validates required fields (name, code, price, qty, supplier).
+* Shows computed cost and saves the part to `customParts`.
+* Upon success, modal closes and new part is selected in the originating row.
+* New part saved with `createdAt`, `createdBy` (userId), and `active=true`.
 
-Accordion must expand/collapse with smooth animation.
+### Add/Edit Mode specifics
+
+* **Add mode**: label/buttons say "Save Parts" and create new `jobCardParts` entry on save.
+* **Edit mode**: label/buttons say "Update Parts"; on load, fetch `jobCardParts[jobCardId]` and populate rows. Track `rowsToDelete` and mark deleted rows by ID instead of immediate removal.
+
+### Validation & Errors
+
+* Disallow saving when no parts rows exist or when required fields (part selection, qty) are missing.
+* Show toasts describing specific validation errors (e.g., "Please select a part in row 2", "Quantity must be at least 1").
 
 ---
 
-## Buttons & Navigation
+## Responsiveness & Layout
 
-* Bounce back arrow top-left linking to:
-
-```
-http://127.0.0.1:5500/app/managementmanagement/vehicle/table.html
-```
-
-* Bottom centered buttons (three):
-
-  * **Save** — validates required fields, prevents duplicate plates, saves new vehicle to `localStorage.vehicleAccounts` as an object with timestamps, shows success toast, then navigates to vehicle list.
-  * **Job Card** — validates & saves (if validation passes) then navigates to job card page for the new vehicle: `http://127.0.0.1:5500/app/management/vehicle/jobcard/{vehicleId}.html` (simulate navigation/alert).
-  * **Cancel** — returns to vehicle list without saving.
-
-Buttons show spinner (100px rotating) during save operations.
+* Desktop (≥1024px): full table view with header and columns.
+* Below 1024px: hide table header and render each row as stacked blocks with `data-label` indicators for each cell.
+* Between 770–1104px: render each row as a 2-column grid for compact layout.
+* Below 480px: compress spacing and stack controls vertically for thumb access.
 
 ---
 
-## Create Brand/Model Modal
+## Formatting & Localization
 
-* Modal allows:
-
-  * Adding a **new brand** with multiple models at once.
-  * Adding **new models** to an existing brand.
-* New entries saved in `localStorage.customBrands` and immediately merged with hardcoded brands, updating dropdowns and pre-selecting newly created values.
-* Prevent duplicate brand/model entries (show inline error/toast).
+* Use `Intl.NumberFormat` for Est Total and Amount formatting (two decimals, thousand separators). Currency code can come from page config or fallback to `USD`.
+* Dates formatted via `toLocaleDateString` with a config fallback.
 
 ---
 
-## Data Storage & Format
+## Feedback & Logging
 
-* Vehicles saved under `localStorage.vehicleAccounts` as an array. Each saved object should include:
-
-  * `id` (generated unique id)
-  * `plateNo`
-  * `vin`
-  * `brand`
-  * `model`
-  * `ownerFirstName`
-  * `ownerLastName`
-  * `primaryContact` (stored `+code-number`)
-  * `whatsappContact` (stored `+code-number` or `null`)
-  * `email`
-  * `companyFleet`
-  * `additionalFields` (object with modelYear, engineCapacity, color, emirates, insurance, claimNo, lpoNo)
-  * `createdAt` (ISO timestamp)
-  * `updatedAt` (ISO timestamp)
-
-* Custom brands stored as `localStorage.customBrands` as an object mapping brand → [models]. On load, merge with hardcoded brands.
+* All actions log to the console for debugging (e.g. `Added part PART123 to row 2`, `Deleted row ID 45`, `Saved jobCardParts for JC1001`).
+* Toasts appear top-center and auto-dismiss after 3s for success; errors remain until user fixes the issue or 5s for critical errors.
 
 ---
 
-## Validation Rules
+## Security & Edge Cases
 
-* Required fields must be filled; show inline red error messages under invalid fields.
-* Plate No: no spaces; max 30; must be unique.
-* VIN: max 30.
-* Brand required; Model required once brand selected.
-* Primary Contact: 9–15 digits (number input); show error: "Please check your primary mobile number and try again." if invalid.
-* WhatsApp: if provided, 9–15 digits.
-* Email: valid format, max 50.
-* Prevent creating duplicate brands/models.
-
-All validation runs on Save/Job Card click (not live), and errors show toast and inline messages.
+* Robust JSON parse/stringify handling for `localStorage` reads/writes with try/catch.
+* Graceful handling when stored data is missing or malformed: fall back to initial datasets and show warnings.
+* Prevent XSS by sanitizing user-entered strings (e.g., part names) before insertion into the DOM.
 
 ---
 
-## UX Details
+## Sample data (included in implementation)
 
-* Show toasts for errors and success (top-right, auto-dismiss 3s).
-* During save/show spinner, disable inputs.
-* On successful save, navigate to vehicle list and log the saved object to console.
-* The Job Card button after saving should navigate to the job card creation page for that vehicle.
-
----
-
-## Brands & Models
-
-* Include 10+ hardcoded brands (sorted alphabetically) with sample models. Merge these with any `localStorage.customBrands` at runtime.
+* **50+ parts** (various categories: brakes, filters, oils, batteries, lights, sensors, belts, hoses, etc.)
+* **20+ suppliers** (Supplier A..T) and a sample `stores` list.
+* The implementation will include these arrays pre-populated in the `<script>` section.
 
 ---
 
-## Accessibility & Keyboard
+## Accessibility
 
-* Modal and accordion accessible via keyboard.
-* Country code dropdown accessible and labeled.
+* Modal focus trap and ESC to close.
+* Keyboard accessible dropdowns and buttons.
+* ARIA labels for dynamic elements and toast announcements.
 
 ---
 
 ## Output
 
-Produce a single file `add.html` containing all HTML, CSS, and JavaScript inline, implementing the features above.
+Produce a single self-contained file `parts.html` with inline CSS and JS implementing the described behaviors and using `localStorage` for persistence.
 
 Would you like me to generate the full single-file implementation now?
 
 ---
 
 ## Image
-<img src='./assets/Screenshot 2025-11-19 145008.png'>
-<img src='./assets/Screenshot 2025-11-19 145024.png'>
+<img src='./assets/Screenshot 2025-11-19 145704.png'>
