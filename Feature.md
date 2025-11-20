@@ -140,3 +140,4 @@ Produce a single self-contained HTML file (inline CSS + JS) implementing the abo
 ---
 ## Image
 <img src='./assets/Screenshot 2025-11-20 124824.png'>
+<img src='./assets/Screenshot 2025-11-20 125223.png'>
