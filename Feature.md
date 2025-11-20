@@ -1,183 +1,125 @@
-# Suppliers Management — README
+# Master Configuration — Add New — README
 
 ## Goal
 
-Create a **single self-contained HTML file** (HTML + inline CSS + vanilla JavaScript) implementing a **Suppliers Management** page. The page stores and displays supplier records in `localStorage`, is easy to use, responsive, and visually consistent with a purple-accent theme.
-
-This README describes the required UI, behavior, data format, and includes **mock data** to initialize `localStorage.suppliers` for testing.
+Create a **single self-contained HTML file** (HTML + CSS + JavaScript) implementing a **Master Configuration Add Form** for storing company settings in `localStorage`. This page is **for adding new configuration only** (no edit/update functionality). The UI should be **clean, responsive, and user-friendly** with proper validations, file handling, and state management.
 
 ---
 
-## Page Path
+## Container & Layout
 
-**URL pattern:** `/app/settings/suppliers/{userId}.html`  
-`userId` is read from the URL and used when constructing Add/Edit navigation links.
-
----
-
-## Layout & Visuals
-
-* Page background: `#F1F3F7`.
-* Main container: card-like area with padding `16px`, background `#F1F3F7` (or slightly lighter white card inside), rounded corners, and subtle shadow.
-* Purple theme accents (buttons, headings, highlights) — use `#2A00B2` (dark purple) for primary actions.
-
-### Table styling
-* Responsive data table inside a white card:
-  * Header background: `#D0D4F2`
-  * Header text: uppercase, bold
-  * Rounded header corners
-  * Row striping: odd → `#F7F6FE`, even → `#FFFFFF`
-  * No visible grid borders; subtle cell padding and rounded corners on cells where appropriate
-  * Table and cell typography: readable font-size, consistent padding
-* On narrow screens:
-  * Hide some address columns to keep layout readable
-  * Table becomes horizontally scrollable when needed
+* Card-style container:
+  * Background: `#E5E8FF`
+  * Padding: `20px`
+  * Rounded corners
+  * Soft shadow
+* Form layout:
+  * Responsive grid
+  * Auto-fit columns with **min-width: 300px**
+  * Collapses to **single-column stack** below 1200px
 
 ---
 
-## Columns
+## Sections & Inputs
 
-* **Supplier Name**
-* **Supplier Id**
-* **Address Line 1**
-* **Address Line 2**
-* **Contact Number**
-* **Status** — badge: “Active” (green badge) or “Inactive” (red badge)
-* **Actions** — Edit button (navigates to `/app/settings/suppliers/edit/{supplierId}.html`)
+### 1. Company Information
 
----
-
-## Toolbar & Controls
-
-* Top-right toolbar:
-  * **Add** button — navigates to `/app/settings/suppliers/add/{userId}.html` (userId from URL)
-* Search box (live):
-  * Filters table as user types across `name`, `supplierId`, `addressLine1`, `addressLine2`, `contactNumber`
-  * Resets pagination to page 1 when changed
-* Column filters:
-  * **Supplier Name** dropdown (populated from full list)
-  * **Supplier Id** dropdown (populated from full list)
-  * Clearing filters resets the view and page to 1
-* Pagination controls:
-  * Rows per page selector: 10 / 20 / 30 / 40
-  * Previous / Next buttons
-  * Page indicator and total count, e.g. `Showing 11–20 of 42 entries`
-  * Pagination is simulated client-side by slicing the filtered array
-
----
-
-## Behavior & Data Handling
-
-* On load:
-  * Show a centered loading spinner while reading data from `localStorage` (short delay allowed).
-  * Ensure `localStorage.suppliers` exists; if not, initialize with the provided mock data (or an empty array depending on implementation choice).
-  * Load both:
-    * `fullSuppliers` — unpaginated complete list (used to populate filters)
-    * `data` — paginated slice derived from the filtered set for display
-* State variables to maintain:
-  * `data` (display slice), `fullSuppliers`, `searchQuery`, `filters`, `page`, `rowsPerPage`, `totalCount`
-* Searching, filtering, and changing rows-per-page reset `page` to 1 and re-render the display slice.
-* Empty results should show a friendly message like:  
-  `No records found / Try adjusting your search or filter criteria`
-* All localStorage access must use `JSON.parse` / `JSON.stringify` inside `try/catch` with graceful fallbacks to prevent UI crashes.
+* Fields:
+  * Client Code
+  * Client Name
+  * Email
+  * Website
+  * TRN
+  * Address (textarea)
+* Phone/Fax groups:
+  * Two groups
+  * Country-code select + phone input
+  * Phone input accepts **digits only** and validates length
+* Color / Custom Fields:
+  * Custom 1 default: `#2A00B2`
+  * Custom 2
+  * Face Unlock timeout default: `5000ms`
+* File inputs:
+  * Sidebar logo
+  * Sidebar open logo
+  * Login image
+  * Invoice header
+  * **Validations**:
+    * File type: PNG/JPG
+    * Max pixel dimensions
+  * Show **preview URLs** if images exist
 
 ---
 
-## Validation rules (for Add/Edit pages)
+### 2. Module Configuration
 
-* When adding or editing suppliers (this page displays and navigates to add/edit pages):
-  * `supplierId` must be unique across `localStorage.suppliers`. Adding/editing code should check uniqueness before saving.
-
----
-
-## Visual & Interaction Details
-
-* Active badge:
-  * Green text/icon on a light-green background (or green pill)
-  * Ensure color contrast is accessible
-* Inactive badge:
-  * Red text/icon on a light-red background
-* Action buttons:
-  * Tooltips on hover
-  * Hover transitions (opacity, slight scale) with `0.15s–0.2s` transitions
-* Focus states:
-  * Inputs, buttons should show visible focus outlines for accessibility
+* Checkbox tiles for features:
+  * Time Management
+  * Vehicle Management
+  * Inventory
+  * Face Unlock
+  * Enable Add Job Card Service/Part
+* **Dependencies**:
+  * Enabling Time Management automatically enables Vehicle Management and Quotation
+  * Quotation must remain enabled
 
 ---
 
-## Implementation Requirements
+### 3. Globalisation
 
-* Use **plain DOM APIs** only:
-  `createElement`, `appendChild`, `querySelector`, `addEventListener`, etc.
-* Keep logic readable:
-  * Modular functions for loading localStorage, rendering filters, applying search/filter, paginating, rendering rows, and saving data
-* All operations must update localStorage (when applicable) and the UI immediately (no external server)
-* Provide clear comments in code to explain non-trivial logic
+* Styled selects for:
+  * Date Format (e.g., DD-MM-YYYY, YYYY-MM-DD)
+  * Number Format (e.g., lakh en-IN, million en-US)
 
 ---
 
-## Mock Data (initialize localStorage.suppliers)
+## Example Mock Data
 
-Place this snippet into your JS initialization logic (or run in the console) if `localStorage.suppliers` is missing — it provides test data to exercise the UI:
+For testing the "Add New" form, the page can initialize `localStorage.masterConfig` as an empty array:
 
 ```js
-// Initialize mock data if none exists
-[
-      {
-        _id: "1",
-        name: "Alpha Traders",
-        supplierId: "SUP001A1",
-        contactNumber: "+971501234567",
-        addressLine1: "Business Bay",
-        addressLine2: "Office 101",
-        active: true,
-        userId: "user123"
-      },
-      {
-        _id: "2",
-        name: "Beta Supplies",
-        supplierId: "SUP002B2",
-        contactNumber: "+971502345678",
-        addressLine1: "Deira Market",
-        addressLine2: "Warehouse 5",
-        active: false,
-        userId: "user123"
-      },
-      {
-        _id: "3",
-        name: "Gamma Corporation",
-        supplierId: "SUP003C3",
-        contactNumber: "+971503456789",
-        addressLine1: "Jumeirah",
-        addressLine2: "Suite 10",
-        active: true,
-        userId: "user123"
-      },
-      {
-        _id: "4",
-        name: "Delta Wholesale",
-        supplierId: "SUP004D4",
-        contactNumber: "+971504567890",
-        addressLine1: "Al Quoz",
-        addressLine2: "",
-        active: true,
-        userId: "user456"
-      },
-      {
-        _id: "5",
-        name: "Epsilon Parts",
-        supplierId: "SUP005E5",
-        contactNumber: "+971505678901",
-        addressLine1: "Sharjah Industrial Area",
-        addressLine2: "Block B",
-        active: false,
-        userId: "user123"
-      }
-    ]
-```
+// Initialize empty config array if missing
+if (!localStorage.masterConfig) {
+  localStorage.masterConfig = JSON.stringify([]);
+}
 
+// Example new entry object after filling form:
+{
+  _id: Date.now() + Math.random(),
+  companyInfo: {
+    clientCode: "CL001",
+    clientName: "First Consulting Group",
+    email: "info@fcg.com",
+    website: "https://www.fcg.com",
+    TRN: "100234567800003",
+    address: "123 Business Bay, Dubai, UAE",
+    tel1: { countryCode: "+971", number: "501234567" },
+    tel2: { countryCode: "+971", number: "502345678" },
+    fax1: { countryCode: "+971", number: "43001234" },
+    fax2: { countryCode: "+971", number: "43005678" },
+    custom1: "#2A00B2",
+    custom2: "#FF5733",
+    faceUnlockTimeout: 5000
+  },
+  moduleConfiguration: {
+    timeManagement: true,
+    vehicleManagement: true,
+    inventory: true,
+    faceUnlock: true,
+    addJobCardServicePart: true,
+    quotation: true
+  },
+  globalisation: {
+    dateFormat: "DD-MM-YYYY",
+    numberFormat: "en-IN" // lakh format
+  },
+  headerImage1: "https://via.placeholder.com/100x50.png?text=Sidebar+Logo",
+  headerImage2: "https://via.placeholder.com/100x50.png?text=Sidebar+Open+Logo",
+  invoiceHeader: "https://via.placeholder.com/300x100.png?text=Invoice+Header",
+  mainImage: "https://via.placeholder.com/200x100.png?text=Login+Image"
+}
+```
 ---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 112635.png'>
-<img src='./assets/Screenshot 2025-11-20 112654.png'>
-<img src='./assets/Screenshot 2025-11-20 112735.png'>
+<img src='./assets/Screenshot 2025-11-20 113851.png'>
+<img src='./assets/Screenshot 2025-11-20 113928.png'>

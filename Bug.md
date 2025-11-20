@@ -1,23 +1,24 @@
-# Bug Fix — Wrong Sum Calculated
+# Bug Fix — Hover Effect Not Removing
 ## Task
 
-Fix so sum of two inputs shows correctly.
+Fix so mouseout returns button to original color.
 
 ## Buggy Code
-``` html
+```html
 <!DOCTYPE html>
 <html>
 <body>
 
-<input id="a" type="number">
-<input id="b" type="number">
-<button id="sum">Sum</button>
-<p id="res"></p>
+<button id="btn" style="background:blue;color:white;">Hover me</button>
 
 <script>
-document.getElementById("sum").onclick = () => {
-    res.innerHTML = a + b;
-}
+btn.addEventListener("mouseover", () => {
+    btn.style.background = "red";
+});
+
+btn.addEventListener("mouseoff", () => {
+    btn.style.background = "blue";
+});
 </script>
 
 </body>
