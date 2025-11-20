@@ -1,124 +1,157 @@
-# Master Configuration
+# Suppliers Management
 
-Create a **single self-contained HTML file** (HTML + CSS + JavaScript) implementing a **Master Configuration Add Form** for storing company settings in `localStorage`. This page is **for adding new configuration only** (no edit/update functionality). The UI should be **clean, responsive, and user-friendly** with proper validations, file handling, and state management.
+Create a **single self-contained HTML file** (HTML + CSS + vanilla JavaScript) for **managing suppliers**. The page stores and displays supplier records in `localStorage` and is designed to be **easy to use, responsive, and visually appealing**.
 
 ---
 
 ## Container & Layout
 
-* Card-style container:
-  * Background: `#E5E8FF`
-  * Padding: `20px`
-  * Rounded corners
-  * Soft shadow
-* Form layout:
-  * Responsive grid
-  * Auto-fit columns with **min-width: 300px**
-  * Collapses to **single-column stack** below 1200px
+* Card-like container:
+  * Padding: 16px
+  * Background: `#F1F3F7`
+  * Rounded corners and soft shadow
+* Table layout:
+  * Responsive
+  * Pale header: `#D0D4F2`
+  * Uppercase bold headings
+  * Rounded first/last header corners
+  * Alternating row colors: odd → `#F7F6FE`, even → `#FFFFFF`
+  * Columns:
+    * Supplier Name
+    * Supplier Id
+    * Address Line 1
+    * Address Line 2
+    * Contact Number
+    * Status (Active/Inactive badge)
+    * Actions (Edit button)
+* On smaller screens:
+  * Certain columns hide to keep layout readable
+  * Table becomes horizontally scrollable if necessary
 
 ---
 
-## Sections & Inputs
+## Toolbar & Actions
 
-### 1. Company Information
-
-* Fields:
-  * Client Code
-  * Client Name
-  * Email
-  * Website
-  * TRN
-  * Address (textarea)
-* Phone/Fax groups:
-  * Two groups
-  * Country-code select + phone input
-  * Phone input accepts **digits only** and validates length
-* Color / Custom Fields:
-  * Custom 1 default: `#2A00B2`
-  * Custom 2
-  * Face Unlock timeout default: `5000ms`
-* File inputs:
-  * Sidebar logo
-  * Sidebar open logo
-  * Login image
-  * Invoice header
-  * **Validations**:
-    * File type: PNG/JPG
-    * Max pixel dimensions
-  * Show **preview URLs** if images exist
+* Top-right toolbar:
+  * **Add button** navigates to `/app/settings/suppliers/add/{userId}.html`  
+    (userId is derived from URL)
+* Each row:
+  * **Edit button** navigates to `/app/settings/suppliers/edit/{supplierId}.html`
+  * Tooltips on action buttons
+* Status badges:
+  * `"Active"` → green badge
+  * `"Inactive"` → red badge
 
 ---
 
-### 2. Module Configuration
+## Features
 
-* Checkbox tiles for features:
-  * Time Management
-  * Vehicle Management
-  * Inventory
-  * Face Unlock
-  * Enable Add Job Card Service/Part
-* **Dependencies**:
-  * Enabling Time Management automatically enables Vehicle Management and Quotation
-  * Quotation must remain enabled
+### Data Handling
+
+* On load:
+  * Ensure `localStorage.suppliers` exists (array of objects):
+    ```js
+    {
+      _id,
+      name,
+      supplierId,
+      contactNumber,
+      addressLine1,
+      addressLine2,
+      active, // true/false
+      userId
+    }
+    ```
+  * Load:
+    * **Paginated slice** for table display
+    * **Full list** for populating filter dropdowns
+
+* All localStorage operations use:
+  * `JSON.parse` / `JSON.stringify`
+  * `try/catch` with graceful fallbacks
 
 ---
 
-### 3. Globalisation
+### Searching & Filtering
 
-* Styled selects for:
-  * Date Format (e.g., DD-MM-YYYY, YYYY-MM-DD)
-  * Number Format (e.g., lakh en-IN, million en-US)
+* **Live search**:
+  * Filters rows by `name`, `supplierId`, `addressLine1`, `addressLine2`, or `contactNumber`
+  * Resets page to 1 on change
+* **Column filters**:
+  * Supplier Name
+  * Supplier Id
+  * Dropdowns populated from full suppliers list
+  * Reset button clears filters
+
+---
+
+### Pagination
+
+* Simulated on client side
+* Controls:
+  * Rows per page: 10, 20, 30, 40
+  * Previous / Next buttons
+  * Page indicator: current page / total pages
+  * Total count: “Showing X–Y of Z entries”
+* Pagination updates dynamically with search/filters
+
+---
+
+### UI & Accessibility
+
+* Loading spinner while fetching data
+* Friendly message when no results: `"No records found / Try adjusting your search or filter criteria"`
+* Hover and focus transitions on buttons
+* Consistent padding and font sizes
+* Responsive design for phones and tablets
+* Visual cues:
+  * Green badge for Active
+  * Red badge for Inactive
 
 ---
 
 ## Example Mock Data
 
-For testing the "Add New" form, the page can initialize `localStorage.masterConfig` as an empty array:
-
 ```js
-// Initialize empty config array if missing
-if (!localStorage.masterConfig) {
-  localStorage.masterConfig = JSON.stringify([]);
-}
-
-// Example new entry object after filling form:
-{
-  _id: Date.now() + Math.random(),
-  companyInfo: {
-    clientCode: "CL001",
-    clientName: "First Consulting Group",
-    email: "info@fcg.com",
-    website: "https://www.fcg.com",
-    TRN: "100234567800003",
-    address: "123 Business Bay, Dubai, UAE",
-    tel1: { countryCode: "+971", number: "501234567" },
-    tel2: { countryCode: "+971", number: "502345678" },
-    fax1: { countryCode: "+971", number: "43001234" },
-    fax2: { countryCode: "+971", number: "43005678" },
-    custom1: "#2A00B2",
-    custom2: "#FF5733",
-    faceUnlockTimeout: 5000
-  },
-  moduleConfiguration: {
-    timeManagement: true,
-    vehicleManagement: true,
-    inventory: true,
-    faceUnlock: true,
-    addJobCardServicePart: true,
-    quotation: true
-  },
-  globalisation: {
-    dateFormat: "DD-MM-YYYY",
-    numberFormat: "en-IN" // lakh format
-  },
-  headerImage1: "https://via.placeholder.com/100x50.png?text=Sidebar+Logo",
-  headerImage2: "https://via.placeholder.com/100x50.png?text=Sidebar+Open+Logo",
-  invoiceHeader: "https://via.placeholder.com/300x100.png?text=Invoice+Header",
-  mainImage: "https://via.placeholder.com/200x100.png?text=Login+Image"
+// Initialize localStorage.suppliers if missing
+if (!localStorage.suppliers) {
+  localStorage.suppliers = JSON.stringify([
+    {
+      _id: "1",
+      name: "Alpha Traders",
+      supplierId: "SUP001",
+      contactNumber: "+971501234567",
+      addressLine1: "Business Bay, Dubai",
+      addressLine2: "Office 101",
+      active: true,
+      userId: "user123"
+    },
+    {
+      _id: "2",
+      name: "Beta Supplies",
+      supplierId: "SUP002",
+      contactNumber: "+971502345678",
+      addressLine1: "Deira, Dubai",
+      addressLine2: "Warehouse 5",
+      active: false,
+      userId: "user123"
+    },
+    {
+      _id: "3",
+      name: "Gamma Corp",
+      supplierId: "SUP003",
+      contactNumber: "+971503456789",
+      addressLine1: "Jumeirah, Dubai",
+      addressLine2: "",
+      active: true,
+      userId: "user123"
+    }
+  ]);
 }
 ```
----
 
+---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 103610.png'>
-<img src='./assets/Screenshot 2025-11-20 103632.png'>
+<img src='./assets/Screenshot 2025-11-20 104742.png'>
+<img src='./assets/Screenshot 2025-11-20 104810.png'>
+<img src='./assets/Screenshot 2025-11-20 104829.png'>

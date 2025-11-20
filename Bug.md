@@ -1,7 +1,7 @@
-# Bug Fix — Div Background Not Resetting
+# Bug Fix — Alert Not Showing After 2 Seconds
 ## Task
 
-Fix the bug so clicking reset restores background to white.
+Fix the bug so an alert shows after 2 seconds when clicking the button.
 
 ## Buggy Code
 ``` html
@@ -9,13 +9,14 @@ Fix the bug so clicking reset restores background to white.
 <html>
 <body>
 
-<div id="box" style="width:100px;height:100px;background:green;"></div>
-<button id="reset">Reset</button>
+<button id="wait">Wait 2 sec</button>
 
 <script>
-document.getElementById("reset").addEventListener("click", () => {
-    box.backgroundColor = "white";
-});
+document.getElementById("wait").onclick = function(){
+    settimeout(() => {
+        alert("Done!");
+    }, 2000);
+}
 </script>
 
 </body>
