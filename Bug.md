@@ -1,24 +1,21 @@
-# Bug Fix — Username Validation Not Working
+# Bug Fix — Background Color Picker Not Working
 ## Task
 
-Fix the bug where empty username should show "Username required".
+Fix so picking a color updates box background.
 
 ## Buggy Code
-```
+```html
 <!DOCTYPE html>
 <html>
 <body>
 
-<input id="u">
-<button id="check">Check</button>
-<p id="msg"></p>
+<input type="color" id="picker">
+<div id="box" style="width:100px;height:100px;background:#ccc;"></div>
 
 <script>
-check.onclick = () => {
-    if(u.value == null){
-        msg.innerHTML = "Username required";
-    }
-}
+picker.addEventListener("input", () => {
+    box.backgroud = picker.value;
+});
 </script>
 
 </body>
