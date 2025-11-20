@@ -1,125 +1,128 @@
-# Master Configuration — Add New — README
+# Edit Supplier
 
-## Goal
-
-Create a **single self-contained HTML file** (HTML + CSS + JavaScript) implementing a **Master Configuration Add Form** for storing company settings in `localStorage`. This page is **for adding new configuration only** (no edit/update functionality). The UI should be **clean, responsive, and user-friendly** with proper validations, file handling, and state management.
+Create a **single self-contained HTML file** (HTML + CSS + vanilla JavaScript) to **edit an existing supplier**. The page reads from `localStorage.suppliers` and **auto-populates the form with the selected supplier's data by default**, allowing users to update supplier details. The UI should be **responsive, clean, and purple-themed**.
 
 ---
 
-## Container & Layout
+## Navigation & Header
 
-* Card-style container:
+* Page URL: `/app/settings/suppliers/edit/:supplierId.html`  
+  `:supplierId` is the ID of the supplier being edited.
+* Header:
+  * Back arrow (←) navigates to `/app/settings/suppliers/:userId.html`
+    * Shows a **confirmation dialog** if there are unsaved changes
+  * Page title: `"Edit Supplier"`
+
+---
+
+## Form Layout
+
+* Single centered form:
+  * Max width: 800px
   * Background: `#E5E8FF`
-  * Padding: `20px`
-  * Rounded corners
-  * Soft shadow
-* Form layout:
-  * Responsive grid
-  * Auto-fit columns with **min-width: 300px**
-  * Collapses to **single-column stack** below 1200px
+  * Responsive padding (reduced on screens <768px)
+* Top dropdown selector:
+  * Label: `"Select Supplier to Edit *"`
+  * Populates from `localStorage.suppliers`
+  * Option format: `"Supplier Name (SupplierID)"`
+* If no suppliers exist:
+  * Hide the form
+  * Show centered gray message: `"No suppliers found. Please add suppliers first."`
+* **Auto-population**:
+  * On page load, the form should automatically fill all fields with the selected supplier’s existing data from localStorage:
+    * Supplier Name
+    * Supplier ID
+    * Address Line 1
+    * Address Line 2
+    * Contact Number (split into country code and number)
+    * Active status
 
 ---
 
-## Sections & Inputs
+## Form Fields
 
-### 1. Company Information
-
-* Fields:
-  * Client Code
-  * Client Name
-  * Email
-  * Website
-  * TRN
-  * Address (textarea)
-* Phone/Fax groups:
-  * Two groups
-  * Country-code select + phone input
-  * Phone input accepts **digits only** and validates length
-* Color / Custom Fields:
-  * Custom 1 default: `#2A00B2`
-  * Custom 2
-  * Face Unlock timeout default: `5000ms`
-* File inputs:
-  * Sidebar logo
-  * Sidebar open logo
-  * Login image
-  * Invoice header
-  * **Validations**:
-    * File type: PNG/JPG
-    * Max pixel dimensions
-  * Show **preview URLs** if images exist
+* Supplier Name (required)
+* Supplier ID (required, exactly 8 characters)
+* Address Line 1
+* Address Line 2
+* Contact Number:
+  * Stored as `"countryCode-number"` in localStorage
+  * Split into:
+    * Country code dropdown: `+971 UAE`, `+1 USA`, `+44 UK`, `+91 India`
+    * Number input field
+* Active Status:
+  * Custom toggle switch:
+    * Width: 50px, Height: 24px
+    * White circular slider moves left/right
+    * Gray background (`#ccc`) when inactive
+    * Green background (`#4CAF50`) when active
+  * Label dynamically displays `"Active"` / `"Inactive"`
 
 ---
 
-### 2. Module Configuration
+## Buttons
 
-* Checkbox tiles for features:
-  * Time Management
-  * Vehicle Management
-  * Inventory
-  * Face Unlock
-  * Enable Add Job Card Service/Part
-* **Dependencies**:
-  * Enabling Time Management automatically enables Vehicle Management and Quotation
-  * Quotation must remain enabled
+* **Update** (dark purple: `#2A00B2`)
+* **Cancel** (white)
+  * Navigates back to `/app/settings/suppliers/:userId.html`
+  * Shows confirmation dialog if unsaved changes
 
 ---
 
-### 3. Globalisation
+## Validation Rules
 
-* Styled selects for:
-  * Date Format (e.g., DD-MM-YYYY, YYYY-MM-DD)
-  * Number Format (e.g., lakh en-IN, million en-US)
+* All required fields must be filled
+* Supplier ID must be **exactly 8 characters**
+* Contact number must be **9–15 digits**
+* Error messages appear **below each field** in red (`#DC2626`)
+* On successful validation:
+  * Update supplier object in `localStorage.suppliers`
+  * Include name, supplierId, address lines, contact, and active status
+  * Show **success alert**: `"Supplier updated successfully!"`
+  * Refresh dropdown options (keep current supplier selected)
+  * Do not navigate away
 
 ---
 
-## Example Mock Data
+## UI & Styling
 
-For testing the "Add New" form, the page can initialize `localStorage.masterConfig` as an empty array:
+* White input fields
+* Borders: `#D2D5DA`
+* Input height: 42px
+* Proper spacing between fields
+* Responsive for mobile:
+  * Form and inputs adjust width and padding below 768px
+
+---
+
+## Mock Data Example
 
 ```js
-// Initialize empty config array if missing
-if (!localStorage.masterConfig) {
-  localStorage.masterConfig = JSON.stringify([]);
-}
-
-// Example new entry object after filling form:
-{
-  _id: Date.now() + Math.random(),
-  companyInfo: {
-    clientCode: "CL001",
-    clientName: "First Consulting Group",
-    email: "info@fcg.com",
-    website: "https://www.fcg.com",
-    TRN: "100234567800003",
-    address: "123 Business Bay, Dubai, UAE",
-    tel1: { countryCode: "+971", number: "501234567" },
-    tel2: { countryCode: "+971", number: "502345678" },
-    fax1: { countryCode: "+971", number: "43001234" },
-    fax2: { countryCode: "+971", number: "43005678" },
-    custom1: "#2A00B2",
-    custom2: "#FF5733",
-    faceUnlockTimeout: 5000
-  },
-  moduleConfiguration: {
-    timeManagement: true,
-    vehicleManagement: true,
-    inventory: true,
-    faceUnlock: true,
-    addJobCardServicePart: true,
-    quotation: true
-  },
-  globalisation: {
-    dateFormat: "DD-MM-YYYY",
-    numberFormat: "en-IN" // lakh format
-  },
-  headerImage1: "https://via.placeholder.com/100x50.png?text=Sidebar+Logo",
-  headerImage2: "https://via.placeholder.com/100x50.png?text=Sidebar+Open+Logo",
-  invoiceHeader: "https://via.placeholder.com/300x100.png?text=Invoice+Header",
-  mainImage: "https://via.placeholder.com/200x100.png?text=Login+Image"
+if (!localStorage.suppliers) {
+  localStorage.suppliers = JSON.stringify([
+    {
+      _id: "SUP001",
+      name: "Alpha Traders",
+      supplierId: "SUPP0001",
+      contactNumber: "+971-501234567",
+      addressLine1: "Business Bay, Dubai",
+      addressLine2: "Office 101",
+      active: true,
+      userId: "user123"
+    },
+    {
+      _id: "SUP002",
+      name: "Beta Supplies",
+      supplierId: "SUPP0002",
+      contactNumber: "+971-502345678",
+      addressLine1: "Deira, Dubai",
+      addressLine2: "Warehouse 5",
+      active: false,
+      userId: "user123"
+    }
+  ]);
 }
 ```
----
+
 ## Image
-<img src='./assets/Screenshot 2025-11-20 113851.png'>
-<img src='./assets/Screenshot 2025-11-20 113928.png'>
+<img src='./assets/Screenshot 2025-11-20 114758.png'>

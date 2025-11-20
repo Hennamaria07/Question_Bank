@@ -1,7 +1,7 @@
-# Bug Fix — Hover Effect Not Removing
+# Bug Fix — Clock Not Updating
 ## Task
 
-Fix so mouseout returns button to original color.
+Fix so digital clock shows correct current time every second.
 
 ## Buggy Code
 ```html
@@ -9,16 +9,13 @@ Fix so mouseout returns button to original color.
 <html>
 <body>
 
-<button id="btn" style="background:blue;color:white;">Hover me</button>
+<p id="clock"></p>
 
 <script>
-btn.addEventListener("mouseover", () => {
-    btn.style.background = "red";
-});
-
-btn.addEventListener("mouseoff", () => {
-    btn.style.background = "blue";
-});
+setInterval(() => {
+    let now = new Date();
+    clock.innerHTML = now.getHours + ":" + now.getMinutes();
+}, 1000)
 </script>
 
 </body>
