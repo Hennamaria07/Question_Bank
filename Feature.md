@@ -1,239 +1,158 @@
-# Login & Password Reset (Single-file HTML)
+# Job Approval — Authorization Page
 
-**Project:** Self-contained Login & Password Reset page
-**Files:** Single HTML file (pure HTML, CSS, vanilla JavaScript)
-**Author / Style:** Purple-themed, clean layout, centered card design.
-**Intended use:** Local/demo environments where credentials and configuration are stored in `localStorage` (no backend).
+## Goal
 
----
-
-## Overview
-
-This repository contains a single self-contained HTML file that implements a complete **Login** and **Password Reset** UI using only HTML, CSS and JavaScript. All data is stored and read from browser storage (`localStorage` and `sessionStorage`). The UI is centered on-screen, uses a two-column layout (company image left, form right), and includes:
-
-* Toggle to switch between **User** and **Admin** login modes.
-* Employee/Admin ID and Password inputs with icons.
-* Password visibility toggle.
-* Simulated loading state with spinner and disabled inputs.
-* Login-by-QR area (configurable).
-* On-first-login default-password flow → automatic **Password Reset** screen.
-* Responsive behavior for small/medium/large screens.
-* All state persisted locally (no APIs).
-
-This README documents usage, expected `localStorage` and `sessionStorage` keys, customization points, and troubleshooting.
+Create a **single-file HTML/CSS/JavaScript** page that implements a **Job Approval Authorization** editor. The page stores everything in `localStorage` and manages multi-level approval hierarchies (Strength → Root Level → Level 2–5). It must be responsive, accessible, robust, and use a purple-accent clean theme.
 
 ---
 
-## How to use
+## Top-level UI
 
-1. Put the single HTML file anywhere and open it in a modern browser (Chrome, Edge, Firefox).
-2. Before testing, add required sample data to `localStorage` via the browser console (see *LocalStorage keys & formats* below).
-3. Use the Employee ID / Password to sign in. On successful login, session details are saved and the app will check if the stored password is the default (in which case password reset mode is shown).
+* Centered card container with padding, rounded corners, and subtle shadow.
+* `h2` title: **Job Approval**.
+* Responsive approval rows table with columns:
 
-No server, build step, or dependencies are required.
+  * **Strength** (select 0–4)
+  * **Root Level** (select from roles list; unique across rows)
+  * **Level 2** (select)
+  * **Level 3** (select)
+  * **Level 4** (select)
+  * **Level 5** (select)
+  * **Actions** (Delete / Undo / History icons depending on version/state)
+
+Behavior summary:
+
+* Strength controls how many level selects are visible (Strength = 0 shows no extra selects, Strength = 3 shows Level2–4, etc.).
+* Reducing Strength clears higher levels automatically.
+* Root Level options exclude roles already used as roots in other rows. Selecting a duplicate root triggers an error toast and prevents the selection.
+* Within a row, Level selects must exclude roles already chosen in that same row (no duplicate roles within a hierarchy). A helper function `clearDuplicateRoles(row)` removes/clears any duplicated selections.
 
 ---
 
-## LocalStorage keys & expected formats
+## New-row input & Add behavior
 
-The page expects several keys in `localStorage`. The README provides sample objects to paste in a browser console.
+* At the table bottom there is a new-row input line (Strength + Root Level + Level2–5 selects) and a **plus (+) Add button**.
+* Clicking the **Add** (plus icon) performs:
 
-### `config`
+  1. **Validation** — Root Level must be selected; enforce no duplicate roles within the new row and no duplicate root across rows.
+  2. **Generate ID** — unique id created using timestamp+random or UUID (e.g. `Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8)`).
+  3. **Append Row** — push new object into the `approvalLevels` array in `localStorage` and update the UI.
+  4. **Reset** the new-row inputs to defaults.
+  5. **Log** action to console and show a success toast.
 
-Global configuration object. Minimal example:
+Client-side function to call on add: `addNewApprovalRow()` — this is bound to the plus icon's `click` event.
+
+---
+
+## Delete / Undo / History actions
+
+* The **Actions** cell contains:
+
+  * **Delete (trash)** icon for v1 rows — clicking it prompts confirmation and then removes the row from the `approvalLevels` array and updates localStorage. If deletion is disallowed (e.g., referential constraint) show a tooltip explaining why.
+  * For later versions, show **Undo / History** icons to revert or inspect previous versions.
+* The Delete handler is `deleteApprovalRow(id)` — bound to the trash icon `click` event. It logs the action, updates localStorage, and shows success/error toasts.
+
+---
+
+## Save behavior
+
+* A **Save** button validates that root levels are unique across the entire table and that rows meet intra-row uniqueness.
+* Save collects only changed/new rows (compare using `hasRowChanged(currentRow, originalRow)`), increments `version` for modified rows, sets `createdAt`/`updatedAt` timestamps, and persists the `approvalLevels` array in `localStorage`.
+* After save, the script updates user authorizations:
+
+  1. Read `users` from `localStorage`.
+  2. Build sets:
+
+     * `rootRoles = Set(level1 values)
+     * `approvalRoles = Set(level2..level5 values)
+  3. For each user, if user's role is in `approvalRoles`, ensure the "Approvals" menu is present in their `authorizations` array (map menu name to ID via `authorizations` list). If no longer in `approvalRoles`, remove the Approvals menu from that user's authorizations.
+  4. Write updated `users` back to `localStorage`.
+* Save logs actions and shows success toast.
+
+---
+
+## LocalStorage Keys
+
+* `roles` — array of role objects: `{ id, name }`.
+* `authorizations` — array of menu/authorization objects: `{ id, name }`.
+* `users` — array of user objects with `role` and `authorizations` fields.
+* `approvalLevels` — array of approval rows persisted as objects:
 
 ```js
-localStorage.setItem('config', JSON.stringify({
-  companyInfo: {
-    mainImage: 'data:image/png;base64,...' // or an image URL
-  },
-  ui: {
-    showQrLogin: true,      // boolean — show "Login by QR Code" text/area
-    dateFormat: 'DD-MM-YYYY'
-  }
-}));
+{
+  id: 'unique-id',
+  index: 0,                // ordering index
+  strength: 3,
+  level1: 'roleId',        // Root Level
+  level2: 'roleId' | null,
+  level3: 'roleId' | null,
+  level4: 'roleId' | null,
+  level5: 'roleId' | null,
+  version: 1,
+  createdAt: 'ISO timestamp',
+  updatedAt: 'ISO timestamp'
+}
 ```
 
-* `config.companyInfo.mainImage` is used for the left-side clickable image area.
-* Any valid image URL or base64 data URI will work.
-
-### `users`
-
-Array of user objects. Example:
-
-```js
-localStorage.setItem('users', JSON.stringify([
-  {
-    id: 'EMP-001',
-    role: 'user',            // 'user' or 'admin'
-    password: 'password123', // plain-text only for demo purposes (not secure)
-    name: 'Aisha Khan',
-    defaultPassword: true    // if true, after login the user is forced to reset password
-  },
-  {
-    id: 'ADMIN-01',
-    role: 'admin',
-    password: 'admin@2025',
-    name: 'Admin Person',
-    defaultPassword: false
-  }
-]));
-```
-
-> **Important (security):** This demo stores plain-text passwords in `localStorage` for demonstration only. Do not use this in production.
-
-### `session` / `sessionStorage`
-
-On successful login the page will save session details in either `localStorage` or `sessionStorage` depending on implementation (the demo saves to `sessionStorage.sessionUser` for ephemeral sessions):
-
-```js
-sessionStorage.setItem('sessionUser', JSON.stringify({
-  id: 'EMP-001',
-  role: 'user',
-  name: 'Aisha Khan',
-  loggedAt: '2025-11-20T10:00:00Z'
-}));
-```
+All reads/writes use `JSON.parse()` / `JSON.stringify()` in `try/catch`.
 
 ---
 
-## UI & Behavior Details
+## Helper Functions (recommended names)
 
-### Layout & Visual
-
-* Container: white card, centered with `border-radius: 40px`, shadow `0px 8px 4px rgba(0,0,0,0.25)`.
-* Two columns:
-
-  * **Left**: displays company logo (from `config.companyInfo.mainImage`), clickable to the homepage (`/` by default). Padding: `68px` vertical and `40px` horizontal (reduced on small screens).
-  * **Right**: form area separated by `2px solid #E5E7EB`.
-
-### Login toggle
-
-* Top-right of the form area: toggle switch `50px x 24px`.
-* Off (User): gray background; On (Admin): blue `#3a61e0`.
-* Round white slider `20px` that moves right when toggled.
-* Displays label: `User` or `Admin`.
-
-### Heading
-
-* `Sign In to FIRST CONSULTING GROUP` in uppercase purple text with a slide-right entrance animation.
-
-### Inputs
-
-* Two inputs (or dynamic label):
-
-  * Employee ID / Admin ID (changes with toggle)
-  * Password
-* Styles:
-
-  * rounded borders `20px` radius
-  * background `#F8F8F8`
-  * border `1px solid #797979`
-  * height `60px`
-  * width approx `27rem`
-* Right icons:
-
-  * ID field: user icon (decorative)
-  * Password field: eye icon to toggle visibility
-
-### Sign In button
-
-* Centered, `200px x 60px`, radius `10px`.
-* Default background `#91B3FA`, text bold `1.5rem`, color `#2D2D2D`.
-* Hover: purple `#6f42c1` and white text.
-* Active (clicked): slightly shrinks (CSS transform).
-* On click:
-
-  * Inputs and button disabled
-  * Spinner shown
-  * Credentials validated against `localStorage.users`
-  * On success: session saved. If `defaultPassword` is true → automatically enters **Password Reset** mode.
-  * On failure: error alert.
-
-### Password Reset flow
-
-* Form replaced by two inputs:
-
-  * New Password
-  * Confirm Password (with eye icon)
-* Inputs same style as before.
-* Reset button `200px x 60px`:
-
-  * Disabled: gray `#575757`
-  * Enabled: blue `#91B3FA`
-* Button only enabled when both inputs are non-empty and match.
-* On click:
-
-  * Save new password to the matching user object in `localStorage.users`
-  * Show success message: `Password changed successfully!`
-  * Clear fields and reload page, returning to normal login mode.
-
-### Loading & Disabled States
-
-* During loading (simulated auth), all inputs and buttons are disabled.
-* Spinner animation in the sign-in button indicates processing.
-
-### QR Code area
-
-* If `config.ui.showQrLogin === true`, the page displays `Login by QR Code` below the sign-in button.
-* The demo does not implement scanning; this is a UI placeholder.
+* `loadData()` — loads roles, users, authorizations, and approvalLevels from `localStorage`.
+* `renderTable()` — renders current `approvalLevels` array into the DOM.
+* `getAvailableRootLevelRoles()` — returns `roles` minus any `level1` already used.
+* `getAvailableRoles(currentRow)` — returns `roles` minus selections already present in `currentRow`.
+* `clearDuplicateRoles(row)` — removes duplicate role ids within a single row.
+* `hasRowChanged(currentRow, originalRow)` — deep-compare to detect changes.
+* `addNewApprovalRow()` — validates and appends a new row (wired to the plus icon `click`).
+* `deleteApprovalRow(id)` — deletes a row after confirmation (wired to trash icon `click`).
+* `saveApprovalLevels()` — validates and persists changed/new rows and updates users/authorizations.
+* `showToast(message, type)` — top-center green/red auto-dismiss toast.
 
 ---
 
-## Responsive behavior
+## UI Rules & UX
 
-* The layout centers using flexbox and the main container height matches `window.innerHeight` dynamically.
-* **Small screens (≤480px)**:
+* Duplicate checks:
 
-  * Left image area hides.
-  * Padding reduced for the right area.
-  * Input widths and button sizes shrink to fit.
-* **Medium screens (481–768px)**:
-
-  * Input widths and button sizes reduce moderately (responsive rem-based scaling).
-* **Large screens (>768px)**:
-
-  * Inputs and buttons expand to the designed sizes.
-
-All responsive breakpoints are implemented using CSS media queries inside the single HTML file.
+  * Root Level duplicates across rows → **disallow** and show an error toast.
+  * Duplicate roles inside the same row → **clear** the duplicates or prevent selection and show a toast.
+* Strength changes clear higher levels automatically.
+* Tooltips explain disabled actions (e.g., "Cannot delete — role referenced by X").
+* All interactive events should `console.log()` useful debug info (e.g., "Added approval row: {id}", "Deleted approval row: {id}").
 
 ---
 
-## Customization
+## Responsiveness
 
-* **Change company image**: update `config.companyInfo.mainImage` value in `localStorage` (image URL or data URI).
-* **Change users**: update `localStorage.users` array.
-* **Colors and sizes**: CSS variables are defined near the top of the `<style>` block. Modify variables such as:
-
-  * `--input-bg: #F8F8F8`
-  * `--primary-btn: #91B3FA`
-  * `--btn-hover: #6f42c1`
-  * `--toggle-on: #3a61e0`
+* Desktop: full table with header visible.
+* Below breakpoint(s): rows render as stacked card blocks; headers hidden; select controls become full-width; Save/Add buttons become full-width.
+* Use data-label pseudo-elements for stacked layout so each field shows a label in compact mode.
 
 ---
 
-## Sample setup (paste in browser console)
+## Accessibility & Robustness
 
-```js
-// config
-localStorage.setItem('config', JSON.stringify({
-  companyInfo: { mainImage: 'https://via.placeholder.com/300x150?text=Company+Logo' },
-  ui: { showQrLogin: true, dateFormat: 'DD-MM-YYYY' }
-}));
+* Use semantic elements and labels for selects.
+* Keyboard accessibility for selects and action icons.
+* Use `aria-live` for toasts.
+* All localStorage interactions are wrapped in `try/catch` with graceful fallbacks and error toasts.
 
-// users
-localStorage.setItem('users', JSON.stringify([
-  { id: 'EMP-001', role: 'user', password: 'password123', name: 'Aisha', defaultPassword: true },
-  { id: 'EMP-002', role: 'user', password: 'secret', name: 'Suresh', defaultPassword: false },
-  { id: 'ADMIN-01', role: 'admin', password: 'admin@2025', name: 'Admin', defaultPassword: false }
-]));
+---
 
-// Optional: clear session
-sessionStorage.removeItem('sessionUser');
-```
+## Add/Delete JavaScript Bindings (explicit)
 
-Then open the single HTML file and sign in with `EMP-001` / `password123` to test the reset flow.
+* The plus icon **MUST** have an onclick bound to `addNewApprovalRow()` so clicking it appends a validated new row.
+* Each trash/delete icon **MUST** have an onclick bound to `deleteApprovalRow(id)` so clicking it removes the row (after confirmation) and updates `localStorage`.
+
+---
+
+## Output
+
+Produce a **single self-contained HTML file** that implements the above behaviors and persists all data in `localStorage`.
 
 ---
 ## Image
-<img src='./assets/Screenshot 2025-03-28 130604.png'>
+<img src='./assets/Screenshot 2025-07-22 102612.png'>

@@ -1,7 +1,7 @@
-# Bug Fix — Text Not Reversing
+# Bug Fix — Form Validation Not Working
 ## Task
 
-Fix so clicking reverses the input string.
+Fix so empty input shows an alert.
 
 ## Buggy Code
 ```html
@@ -9,13 +9,16 @@ Fix so clicking reverses the input string.
 <html>
 <body>
 
-<input id="txt">
-<button id="rev">Reverse</button>
-<p id="out"></p>
+<form id="f">
+<input id="n" type="text">
+<button>Submit</button>
+</form>
 
 <script>
-rev.onclick = () => {
-    out.innerHTML = txt.value.split("").reverse.join("");
+document.getElementById("f").onsubmit = (e) => {
+    if(n.value = ""){
+        alert("Required");
+    }
 }
 </script>
 
