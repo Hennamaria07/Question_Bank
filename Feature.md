@@ -1,183 +1,181 @@
-# Mobile Job History
+# Edit Vehicle Form — README
 
 ## Goal
 
-Build a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) optimized for **mobile screens below 800px** that implements a **Job History** view. The component must use `localStorage` for data, provide search and filtering, support pagination and PDF invoice generation, and present a clean mobile-first layout with accessible modals and toasts.
+Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) that implements an **Edit Vehicle Form**. The page must use the same layout, styles, and responsive behavior as the Add form and pre-populate fields from `localStorage`.
+
+This page will live at a route like:
+
+```
+/app/management/vehicle/edit.html?vehicleId={vehicleId}
+```
+
+
+## Loading & Data Fetching
+
+* On `DOMContentLoaded`, read the `vehicleId` from the URL (path or query parameter as appropriate).
+* Show a centered rotating **loading spinner** (100px diameter border animation) while fetching data from `localStorage['vehicleAccounts']`.
+
+  * Spinner styling: rotating border with colors `#5f8edb` and `#3B82F6`.
+* If the `vehicleId` is not found, show an error toast: **"Vehicle not found"** and redirect to the vehicle list page.
+* If found, pre-populate the form fields with the stored vehicle object and hide the spinner.
 
 ---
 
-## Header
+## Layout & Visuals
 
-* Title: **History** (font-size 20px, font-weight bold, color `#333333`, margin-bottom `20px`).
-* Top-right **Filter** icon button opens mobile filter popover anchored to the button.
-* Filter popover: width `220px`, border-radius `8px`, padding `16px`, white background, anchored bottom-right. Contains "FILTERS" header, a **RESET** button, Close icon, and two date inputs for **Arrival Date** and **Delivered Date** (native `type=date`, styled, border `2px solid #D2D5DA`).
+* Use the **same three-column layout** as the Add form (left/middle/right) and identical styling:
 
----
+  * Card background `#E5E8FF`, inputs white `#FFFFFF` with border `2px solid #D2D5DA`.
+  * Buttons, spacing, fonts and responsive breakpoints must match the Add form.
+* Back arrow at top-left that navigates to:
 
-## Search
-
-* Full-width search input below header with Search icon start adornment.
-* Style: white background, height `40px`, border-radius `4px`, placeholder **"Search services..."**, margin-bottom `16px`.
-* Typing filters job cards (matching name, dates, amounts) and resets pagination to page 1.
+```
+/app/management/vehicle/table/{vehicleId}
+```
 
 ---
 
-## Job History Cards
+## Form Fields (pre-populated)
 
-* Vertical stack of cards (gap `16px`).
-* Card style: background `#f2f2f2`, border-radius `8px`, padding `15px`, box-shadow `0 2px 4px rgba(0,0,0,0.1)`.
+All fields mirror the Add form but are pre-filled with saved values from the matched `vehicleAccounts` entry.
 
-### Card Header
+### Primary Fields
 
-* Left: **Job History** title (bold).
-* Right: **PDF icon button** (red `#e74c3c`) with tooltip **"Generate Invoice PDF"** — opens Invoice modal.
+* **Plate No.** — pre-filled, editable. Validation: no spaces allowed, max 30 characters.
+* **VIN** — pre-filled, editable, max 30 characters.
+* **Vehicle Brand** — dropdown, pre-selected. Changing brand filters & resets the **Model** dropdown.
+* **Vehicle Model** — dropdown populated based on the selected brand; pre-selected to stored model.
+* **First Name** — pre-filled, max 30 characters.
+* **Last Name** — pre-filled, max 30 characters.
+* **Primary Contact Number** — stored as string like `+971-9876543210`; split on `-` to pre-select country code dropdown and fill the number input (validate 9–15 digits).
+* **WhatsApp Contact Number** — same split behavior; if stored value contains only country code like `+971-` display empty number input.
+* **Email** — pre-filled, max 50 chars, must be valid format.
+* **Company Fleet Name** — pre-filled if exists.
 
-### Card Body
+### Additional Fields (Accordion)
 
-* Grid (label-value pairs) showing:
+Collapsed by default; expandable with smooth animation.
 
-  * **Arrival Date** (formatted)
-  * **Delivery Date** (formatted)
-  * **Total Hours** (HH:MM)
-  * **Total Amount** (currency formatted)
-* Display uses `flex` with `justify-content: space-between`, font-size `14px`.
+* **Model Year**
+* **Engine Capacity**
+* **Color**
+* **Emirates**
+* **Insurance**
+* **Claim No**
+* **LPO No**
 
-### Empty State
-
-* If no records, show centered card: **"No history available"** (height `200px`, font-size `18px`).
-
----
-
-## Pagination (Fixed Bottom Bar)
-
-* Fixed bottom bar: `position: fixed; bottom:0; left:0; right:0; background:#F1F3F7; padding:8px 0; z-index:1;`.
-* Contains Previous/Next buttons and circular page buttons (32px) with active page background `#2196f3`.
-* Disabled buttons at edges show reduced opacity.
-* Pagination calculated from `filteredData.length / itemsPerPage` (default 10).
+All of the above pre-filled if existing in the stored object.
 
 ---
 
-## Invoice Modal (PDF)
+## Buttons & Actions
 
-* Triggered by clicking PDF icon on a card.
-* Modal: centered fixed dialog `width:250px` on mobile, white background, border-radius `8px`, padding `24px`, box-shadow `0 8px 24px rgba(0,0,0,0.2)` with backdrop overlay.
-* Modal captures `jobCardId` and `deliveryDate` from clicked card and stores in state.
-* Modal contents:
+* **Update** (primary): replaces Save from Add form.
 
-  * Title: **Select Invoice Date** (font-size `18px`, font-weight `500`).
-  * Dropdown **Invoice Date** with three options: `Current Date`, `Delivery Date`, `Pick a Date`.
-  * Helper text: **"Select a date for the invoice"** (font-size `11px`).
-  * If `Pick a Date` selected, show native datepicker input (styled, value in `YYYY-MM-DD`).
-  * Submit button (full width, blue `#1976d2`) validates selection; on success format date per config and navigate to `/app/management/vehicle/jobcard/invoice/${jobCardId}`, passing `{invoiceDate, jobOrderId}` via `history.pushState` or query params.
-* Modal can be closed by backdrop click, Escape key, or Close button. When open, body scroll locked.
+  * Background `#2A00B2`, white text, same dimensions and styling as Save.
+  * On click: validate the form (rules below), then update the matching vehicle object in `localStorage['vehicleAccounts']` by `id`:
 
----
+    * Preserve `createdAt`.
+    * Add/update `updatedAt` with current datetime (ISO string).
+    * Merge changes into existing object.
+  * On successful update: show success toast **"Vehicle updated successfully"** and navigate to the vehicle list.
+* **Job Card**: performs the same validation and update as Update, then navigates to the job card creation flow (same as Add behavior).
+* **Cancel**: navigates back to the vehicle list without saving.
 
-## Data & Storage
-
-* Load job history from `localStorage` key `jobHistory`, filter by `vehicleId` if provided.
-* Dates stored in `YYYY-MM-DD` format.
-* Config fallbacks:
-
-  * `config.globalisation.dateFormat` or `DD-MM-YYYY`
-  * `config.companyInfo.currencyCode` or `AED`
-  * `config.globalisation.numberFormat.code` or `en-US`
+All navigations should use `window.location.href`.
 
 ---
 
-## Formatting & Utilities
+## Brand & Model Dialogs
 
-* Currency formatting via `Intl.NumberFormat` using currency code.
-* Hours formatting: convert decimal hours to `HH:MM` and vice versa.
-* Dates formatted per config or fallback.
-
----
-
-## Filtering & Pagination Logic
-
-* Filter flow: apply searchQuery against formatted dates/amounts and apply date filters (exact match) if provided.
-* Compute `totalPages = Math.ceil(filteredData.length / itemsPerPage)`.
-* Paginate results and render current page slice.
+* Allow creating new brand/model pairs via a dialog identical to Add form's Brand/Model dialog.
+* Newly created brand/model entries are saved to `localStorage['customBrands']` (or merge with existing store) and immediately refresh the brand and model dropdowns, selecting the newly created item.
+* Prevent duplicate brand/model entries.
 
 ---
 
-## Accessibility & UX
+## Country Code Handling
 
-* Tooltips for icon buttons.
-* Keyboard support: Escape closes modal; focus management for modal.
-* Toast notifications for validation and errors (top-center, auto-dismiss 3s).
-* Scroll lock when filter dialog or modal open.
+* Country code dropdowns must contain ~50 country codes with flags and sorted names.
+* When pre-populating contact fields, split stored strings by `-`:
+
+  * Example: `+971-9876543210` → country code `+971` pre-selected, number `9876543210` populated.
+  * If stored WhatsApp is `+971-` or `+971` (no number), show the dropdown pre-selected and an empty number input.
 
 ---
 
-## Implementation Notes
+## Validation Rules
 
-* All `localStorage` operations wrapped in `try/catch` with toast errors on failure.
-* Use `DOMContentLoaded` to initialize state and render UI.
-* Console.log major user actions for debugging (open modal, select date, navigate to invoice, filter, paginate).
+* **Plate No.**: required, no spaces, ≤ 30 characters.
+* **VIN**: required, ≤ 30 characters.
+* **First/Last Name**: required, ≤ 30 characters each.
+* **Email**: optional? (match Add form behavior) — if provided, must be valid and ≤ 50 chars.
+* **Primary Contact**: required, numeric, 9–15 digits (after splitting country code). Show specific inline error: **"Please check your primary mobile number and try again."**
+* **WhatsApp**: optional; if provided, same validation as primary.
+* **All fields must not exceed max lengths**; show inline red error messages under each invalid field.
+* On submit, if any required validation fails, show an overall error toast describing the issue.
+
+---
+
+## Update Behavior & Edge Cases
+
+* Preserve `id` and `createdAt` when saving; set or update `updatedAt`.
+* If the user changes the brand, the model dropdown must reset (clear selection) and require a valid model selection before saving.
+* If user creates a new brand/model during edit, update dropdowns immediately and select the new values.
+* If the provided `vehicleId` is not found, show an error toast and redirect to the list page.
+
+---
+
+## UX & Accessibility
+
+* Loading spinner centered and visible until DOM is populated.
+* Smooth transitions (300ms) for dropdowns, accordion expand/collapse, dialog open/close.
+* Country dropdowns should show flags and be keyboard accessible.
+* Keyboard focus management: focus first input after load; trap focus within dialogs while open.
+
+---
+
+## Storage & API Surface
+
+* `localStorage['vehicleAccounts']`: array of vehicle objects. Update by finding the object with `id === vehicleId` and replacing/merging.
+* `localStorage['customBrands']`: array for user-added brands/models.
+* Wrap all `localStorage` reads/writes in `try/catch` and show toasts on failure.
+
+Example vehicle object shape:
+
+```json
+{
+  "id": "VH-001",
+  "plateNo": "KL-07-AB-1234",
+  "vin": "1HGCM82633A004352",
+  "brand": "Toyota",
+  "model": "Camry",
+  "firstName": "John",
+  "lastName": "Doe",
+  "primaryContact": "+971-9876543210",
+  "whatsapp": "+971-9876543210",
+  "email": "john.doe@example.com",
+  "companyFleet": "ABC Motors",
+  "additional": { "modelYear": "2019", "engineCapacity": "2.5L" },
+  "createdAt": "2025-07-01T12:00:00.000Z"
+}
+```
+
+---
+
+## Feedback & Toasts
+
+* Use top-center toast notifications for success (green) and errors (red), auto-dismiss after 3s.
+* Provide inline field-level error messages in red for validation failures.
 
 ---
 
 ## Output
 
-Produce a **single self-contained HTML file** with inline CSS and JS implementing the Mobile Job History View per the spec above.
-
-## Sample data
-```js
-[
-  {
-    "jobCardId": "JC-1001",
-    "vehicleId": "VH-001",
-    "arrivalDate": "2025-01-05",
-    "deliveryDate": "2025-01-07",
-    "totalHours": "04:30",
-    "totalAmount": 820.50
-  },
-  {
-    "jobCardId": "JC-1002",
-    "vehicleId": "VH-001",
-    "arrivalDate": "2025-02-10",
-    "deliveryDate": "2025-02-11",
-    "totalHours": "02:15",
-    "totalAmount": 460.00
-  },
-  {
-    "jobCardId": "JC-1003",
-    "vehicleId": "VH-001",
-    "arrivalDate": "2025-03-01",
-    "deliveryDate": "2025-03-03",
-    "totalHours": "06:45",
-    "totalAmount": 1250.00
-  },
-  {
-    "jobCardId": "JC-1004",
-    "vehicleId": "VH-002",
-    "arrivalDate": "2025-03-15",
-    "deliveryDate": "2025-03-16",
-    "totalHours": "03:30",
-    "totalAmount": 575.20
-  },
-  {
-    "jobCardId": "JC-1005",
-    "vehicleId": "VH-003",
-    "arrivalDate": "2025-04-02",
-    "deliveryDate": "2025-04-04",
-    "totalHours": "05:10",
-    "totalAmount": 980.75
-  },
-  {
-    "jobCardId": "JC-1006",
-    "vehicleId": "VH-003",
-    "arrivalDate": "2025-04-25",
-    "deliveryDate": "2025-04-26",
-    "totalHours": "01:45",
-    "totalAmount": 300.00
-  }
-]
-```
+Produce a **single self-contained HTML file** (e.g., `edit.html`) with inline CSS and JavaScript that implements the Edit Vehicle.
 
 ---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 132131.png'>
-<img src='./assets/Screenshot 2025-11-20 132146.png'>
-<img src='./assets/Screenshot 2025-11-20 132321.png'>
+<img src='./assets/Screenshot 2025-11-20 132750.png'>
+<img src='./assets/Screenshot 2025-11-20 132814.png'>

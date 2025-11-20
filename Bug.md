@@ -1,7 +1,7 @@
-# Bug Fix — Simple Calculator Not Working
+# Bug Fix — Dark Mode Not Applying
 ## Task
 
-Fix so selecting the operator performs correct calculation.
+Fix so clicking button toggles dark mode.
 
 ## Buggy Code
 ```html
@@ -9,20 +9,12 @@ Fix so selecting the operator performs correct calculation.
 <html>
 <body>
 
-<input id="x" type="number">
-<select id="op">
-<option value="+">+</option>
-<option value="-">-</option>
-</select>
-<input id="y" type="number">
-<button id="cal">Calculate</button>
-<p id="res"></p>
+<button id="dark">Dark Mode</button>
 
 <script>
-cal.onclick = function() {
-    if(op == "+") res.innerHTML = x.value + y.value;
-    else res.innerHTML = x.value - y.value;
-}
+document.getElementById("dark").addEventListener("click", function(){
+    document.body.classlist.toggle("dark");
+});
 </script>
 
 </body>
