@@ -1,128 +1,103 @@
-# Edit Supplier
+# Add Spare Parts
 
-Create a **single self-contained HTML file** (HTML + CSS + vanilla JavaScript) to **edit an existing supplier**. The page reads from `localStorage.suppliers` and **auto-populates the form with the selected supplier's data by default**, allowing users to update supplier details. The UI should be **responsive, clean, and purple-themed**.
-
----
-
-## Navigation & Header
-
-* Page URL: `/app/settings/suppliers/edit/:supplierId.html`  
-  `:supplierId` is the ID of the supplier being edited.
-* Header:
-  * Back arrow (←) navigates to `/app/settings/suppliers/:userId.html`
-    * Shows a **confirmation dialog** if there are unsaved changes
-  * Page title: `"Edit Supplier"`
+Create a **single self-contained HTML file** (pure HTML + CSS + vanilla JavaScript only) for the route  
+`/app/settings/spareparts/add/:userId` that implements a complete **Add Spare Parts** interface with temporary cart-style behavior using `localStorage` and `sessionStorage`.
 
 ---
 
-## Form Layout
-
-* Single centered form:
-  * Max width: 800px
-  * Background: `#E5E8FF`
-  * Responsive padding (reduced on screens <768px)
-* Top dropdown selector:
-  * Label: `"Select Supplier to Edit *"`
-  * Populates from `localStorage.suppliers`
-  * Option format: `"Supplier Name (SupplierID)"`
-* If no suppliers exist:
-  * Hide the form
-  * Show centered gray message: `"No suppliers found. Please add suppliers first."`
-* **Auto-population**:
-  * On page load, the form should automatically fill all fields with the selected supplier’s existing data from localStorage:
-    * Supplier Name
-    * Supplier ID
-    * Address Line 1
-    * Address Line 2
-    * Contact Number (split into country code and number)
-    * Active status
+## Header
+- **Back Arrow** (Left Arrow) with **bouncing animation** on hover  
+  → Navigates to `/app/settings/spareparts/:userId`  
+  → Shows **confirmation dialog** if there are unsaved parts in `sessionStorage.spareParts`
+- Page Title: **Add Spare Parts** (24px, bold, #232323)
 
 ---
 
-## Form Fields
+## Layout (Responsive Flexbox)
 
-* Supplier Name (required)
-* Supplier ID (required, exactly 8 characters)
-* Address Line 1
-* Address Line 2
-* Contact Number:
-  * Stored as `"countryCode-number"` in localStorage
-  * Split into:
-    * Country code dropdown: `+971 UAE`, `+1 USA`, `+44 UK`, `+91 India`
-    * Number input field
-* Active Status:
-  * Custom toggle switch:
-    * Width: 50px, Height: 24px
-    * White circular slider moves left/right
-    * Gray background (`#ccc`) when inactive
-    * Green background (`#4CAF50`) when active
-  * Label dynamically displays `"Active"` / `"Inactive"`
+| Section                | Flex     | Background   | Purpose                                   |
+|------------------------|----------|--------------|-------------------------------------------|
+| **Left – Form**        | `flex: 3`| `#E5E8FF`    | Spare part input form                     |
+| **Right – Preview**    | `flex: 2`| `#E5E8FF`    | Live preview of added parts (cards)       |
+
+- Right section **visible only when parts exist**
+- Preview area: scrollable, `max-height: 400px`, custom styled scrollbar (8px width, #888 → #555 hover)
 
 ---
 
-## Buttons
+## Form Fields (All required – red asterisk *)
 
-* **Update** (dark purple: `#2A00B2`)
-* **Cancel** (white)
-  * Navigates back to `/app/settings/suppliers/:userId.html`
-  * Shows confirmation dialog if unsaved changes
+| Field            | Type                                 | Validation & Formatting                                                                 |
+|------------------|--------------------------------------|------------------------------------------------------------------------------------------|
+| Part Name        | Text input                           | Required                                                                                 |
+| Part Code        | Text input                           | Required                                                                                 |
+| Description      | Text input                           | Required                                                                                 |
+| Price            | Number input                         | Regex `/^[0-9]*\.?[0-9]{0,2}$/`<br>• Focus: raw number<br>• Blur: formatted with commas + 2 decimals + currency (AED default) |
+| Qty              | Number input (decimal allowed)       | Max 2 decimal places                                                                     |
+| Supplier         | Styled `<select>`                    | Populated from `localStorage.suppliers` (only `active: true`)<br>White bg, black text, custom border |
+| Exp Date         | Native `<input type="date">`         | Min = today<br>Displayed as `DD-MM-YYYY` (from config or default)                        |
 
----
-
-## Validation Rules
-
-* All required fields must be filled
-* Supplier ID must be **exactly 8 characters**
-* Contact number must be **9–15 digits**
-* Error messages appear **below each field** in red (`#DC2626`)
-* On successful validation:
-  * Update supplier object in `localStorage.suppliers`
-  * Include name, supplierId, address lines, contact, and active status
-  * Show **success alert**: `"Supplier updated successfully!"`
-  * Refresh dropdown options (keep current supplier selected)
-  * Do not navigate away
+### Form Buttons
+| Button   | Style                                      | Action                                      |
+|----------|--------------------------------------------|---------------------------------------------|
+| Add      | `#91B3FA` bg, `#343434` text, 127×48px     | Validate → add to preview → save to sessionStorage |
+| Cancel   | White bg, `#616161` text, border           | Navigate back (with confirmation if unsaved) |
 
 ---
 
-## UI & Styling
+## Right Panel – Added Parts Cards
 
-* White input fields
-* Borders: `#D2D5DA`
-* Input height: 42px
-* Proper spacing between fields
-* Responsive for mobile:
-  * Form and inputs adjust width and padding below 768px
+Each card:
+- Background: `#F2F2F2`
+- Height: 210px, `min-width: 8rem`
+- Border: `1px solid #ccc`, `5px` radius
+- Padding: 10px, Margin: 10px
+- Close Button (Times) top-right → removes item
+
+**Card displays (label: value format):**
+- **Part Name** (h5, 18px, bold)
+- Part Code
+- Description
+- Price (formatted with currency)
+- Quantity
+- Supplier (name looked up from suppliers array)
+- Exp Date (DD-MM-YYYY)
+- **Total Cost** = Price × Qty (formatted)
 
 ---
 
-## Mock Data Example
+## Final Save Button (Bottom of preview panel)
+- Appears only when ≥1 part added
+- Style: `#2A00B2` background, white text, centered
+- On click:
+  → Validate at least one part exists
+  → Show **success toast**
+  → Clear `sessionStorage.spareParts`
+  → Navigate back to list page
 
+---
+
+## Data Storage
+
+| Storage           | Key               | Content                                                                 |
+|-------------------|-------------------|-------------------------------------------------------------------------|
+| `localStorage`    | `suppliers`       | Array of `{ id, name, active }` objects                                 |
+| `localStorage`    | `config`          | `{ currency: "AED", dateFormat: "DD-MM-YYYY" }`                         |
+| `sessionStorage`  | `spareParts`      | Temporary array of added parts (persists on refresh)                    |
+
+**Saved Object Structure:**
 ```js
-if (!localStorage.suppliers) {
-  localStorage.suppliers = JSON.stringify([
-    {
-      _id: "SUP001",
-      name: "Alpha Traders",
-      supplierId: "SUPP0001",
-      contactNumber: "+971-501234567",
-      addressLine1: "Business Bay, Dubai",
-      addressLine2: "Office 101",
-      active: true,
-      userId: "user123"
-    },
-    {
-      _id: "SUP002",
-      name: "Beta Supplies",
-      supplierId: "SUPP0002",
-      contactNumber: "+971-502345678",
-      addressLine1: "Deira, Dubai",
-      addressLine2: "Warehouse 5",
-      active: false,
-      userId: "user123"
-    }
-  ]);
+{
+  name: "Brake Pad",
+  partNumber: "BP-2025",
+  description: "Front brake pad set",
+  price: 250.00,
+  quantity: 5.5,
+  cost: 1375.00,           // price × quantity
+  vendor: "sup_123",
+  expiryDate: "2026-12-15",
+  active: true
 }
 ```
-
 ## Image
-<img src='./assets/Screenshot 2025-11-20 114758.png'>
+<img src='./assets/Screenshot 2025-11-20 121303.png'>

@@ -1,7 +1,7 @@
-# Bug Fix — Clock Not Updating
+# Bug Fix — Div Height Animation Not Working
 ## Task
 
-Fix so digital clock shows correct current time every second.
+Fix so clicking grows div height by animation.
 
 ## Buggy Code
 ```html
@@ -9,13 +9,13 @@ Fix so digital clock shows correct current time every second.
 <html>
 <body>
 
-<p id="clock"></p>
+<div id="box" style="width:100px;height:50px;background:orange;transition:height 0.5s;"></div>
+<button id="grow">Grow</button>
 
 <script>
-setInterval(() => {
-    let now = new Date();
-    clock.innerHTML = now.getHours + ":" + now.getMinutes();
-}, 1000)
+grow.onclick = () => {
+    box.hight = "200px";
+}
 </script>
 
 </body>
