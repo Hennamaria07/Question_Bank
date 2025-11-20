@@ -1,239 +1,182 @@
-# Mobile Holiday Management — README
+# Mobile Job History
 
 ## Goal
 
-Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) optimized for **mobile screens below 600px** that implements a **Holiday Management View** using `localStorage` for persistence. The component must follow a clean, purple-accent theme and provide search, filtering, edit/delete, and pagination controls tailored for mobile UX.
+Build a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) optimized for **mobile screens below 800px** that implements a **Job History** view. The component must use `localStorage` for data, provide search and filtering, support pagination and PDF invoice generation, and present a clean mobile-first layout with accessible modals and toasts.
 
 ---
 
-## Container & Page Layout
+## Header
 
-* Page container: `padding: 16px`, background `#F1F3F7`, `min-height: 100vh`.
-* Mobile-first design targeting screens `< 600px`.
-
----
-
-## Header Controls
-
-* Top header: `display: flex; justify-content: space-between; margin-bottom: 16px;`
-
-* **Left:** Two toggle switches for **SUN** and **SAT**:
-
-  * Inline-flex, gap `4px`, label font-size `14px`, color `#404040`.
-  * Custom toggle checkbox: rounded toggle `width: 44px; height: 24px;`.
-  * Unchecked background `#ccc`; checked background `#2196f3`.
-  * Slider circle `20px`, white, transition `0.3s`.
-  * Toggle state is read from and saved to `localStorage` key `weekdays` (JSON array of objects `{dayNumber, active}` where `0` is Sunday and `6` is Saturday).
-  * On change update `weekdays` in `localStorage`, update local weekdays state and UI.
-  * Label margin-left approx `-0.2` for tight spacing.
-
-* **Right:** Two icon buttons:
-
-  * **Filter** button (40×40 circle). On click open filter popover/overlay (`filterAnchorEl` state).
-  * **Add** button (40×40 circle). On click navigate to `/app/settings/holiday/config` via `window.location.href`.
-  * Both buttons: hover opacity `0.7`.
+* Title: **History** (font-size 20px, font-weight bold, color `#333333`, margin-bottom `20px`).
+* Top-right **Filter** icon button opens mobile filter popover anchored to the button.
+* Filter popover: width `220px`, border-radius `8px`, padding `16px`, white background, anchored bottom-right. Contains "FILTERS" header, a **RESET** button, Close icon, and two date inputs for **Arrival Date** and **Delivered Date** (native `type=date`, styled, border `2px solid #D2D5DA`).
 
 ---
 
-## Search Input
+## Search
 
-* Full-width search below header:
-
-  * `width: 100%`, `height: 40px`, padding `0 12px 0 40px`, border `2px solid #D2D5DA`, border-radius `6px`, background `#FFFFFF`, font-size `14px`.
-  * Left-positioned search icon (`position: absolute; left: 12px; top: 50%; transform: translateY(-50%);`).
-  * Placeholder: **"Search holidays..."**.
-  * Value bound to `searchQuery` state; on change filter displayed cards and reset `currentPage` to 1.
+* Full-width search input below header with Search icon start adornment.
+* Style: white background, height `40px`, border-radius `4px`, placeholder **"Search services..."**, margin-bottom `16px`.
+* Typing filters job cards (matching name, dates, amounts) and resets pagination to page 1.
 
 ---
 
-## Holiday Cards List
+## Job History Cards
 
-* Vertical stack of cards with `gap: 16px`.
-* Each card style: background `#FFFFFF`, border-radius `8px`, padding `16px`, box-shadow `0 2px 4px rgba(0,0,0,0.1)`.
+* Vertical stack of cards (gap `16px`).
+* Card style: background `#f2f2f2`, border-radius `8px`, padding `15px`, box-shadow `0 2px 4px rgba(0,0,0,0.1)`.
 
 ### Card Header
 
-* `display:flex; justify-content: space-between; align-items: center;`
-* **Left:** Event name (`h6`): font-size `18px`, bold, max-width `200px`, ellipsis overflow.
+* Left: **Job History** title (bold).
+* Right: **PDF icon button** (red `#e74c3c`) with tooltip **"Generate Invoice PDF"** — opens Invoice modal.
 
-  * When editing (`isEditing` true) show input field instead (200px wide, 32px high) bound to `holiday.name`.
-* **Right:** Action icons container (`display:flex; gap:8px`):
+### Card Body
 
-  * Editing state shows **Save** (green) and **Cancel** (red-ish) icons.
-  * Delete state shows **Delete** (red) and **Cancel** icons.
-  * Default shows **Edit** (blue) and **Delete** icons.
-  * Edit is disabled for past holidays (`status === "Over"`) — gray, `cursor:not-allowed`, tooltip `Cannot edit past holidays`.
+* Grid (label-value pairs) showing:
 
-### Card Content
+  * **Arrival Date** (formatted)
+  * **Delivery Date** (formatted)
+  * **Total Hours** (HH:MM)
+  * **Total Amount** (currency formatted)
+* Display uses `flex` with `justify-content: space-between`, font-size `14px`.
 
-* Grid layout with gap `12px`.
-* **Start Date** and **End Date** sections:
+### Empty State
 
-  * If editing: show native `type=date` inputs (height 42px, border `2px solid #D2D5DA`, border-radius `6px`). End Date `min` bound to Start Date.
-  * If not editing: show label `Start Date:` / `End Date:` and formatted date value using `config.globalisation.dateFormat` (fallback `DD-MM-YYYY`).
-* **Status chip:** small rounded badge showing **Over** (red `#FF0000`), **Upcoming** (orange `#FFA500`), or **Ongoing** (green `#008000`) determined by comparing today with start/end dates.
-
----
-
-## Empty State
-
-* If filtered results are empty show a centered card:
-
-  * `h6`: "No records found" (18px, `#404040`)
-  * `p`: "Try adjusting your search or filter criteria" (14px, `#666`)
-
----
-
-## Filter Popover (Mobile)
-
-* Fullscreen overlay (`position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.5); z-index:1000`) that can be closed by tapping the backdrop.
-* Centered filter panel (`width:320px; max-height:80vh; background:#FFF; border-radius:8px; padding:16px`) with:
-
-  * Header: **FILTERS** label and **RESET** button that clears date filters and resets `currentPage`.
-  * Close button to dismiss.
-  * Body: two date inputs (Start, End). Changing dates immediately filters displayed data; End date `min` bound to Start date.
-* When open, apply scroll lock: `document.body.style.overflow = 'hidden'`; restore on close.
+* If no records, show centered card: **"No history available"** (height `200px`, font-size `18px`).
 
 ---
 
 ## Pagination (Fixed Bottom Bar)
 
-* Fixed bottom bar (`position: fixed; bottom:0; left:0; right:0; background:#F1F3F7; padding:12px 0; z-index:100`) with controls centered.
-* Previous/Next circular buttons (32px) with disabled state when at edges (opacity 0.5, `cursor:not-allowed`).
-* Page number buttons (32px circular) showing up to 5 pages with ellipses for larger ranges. Active page background `#2196f3` with white text.
-* Only show when `totalPages > 0`.
+* Fixed bottom bar: `position: fixed; bottom:0; left:0; right:0; background:#F1F3F7; padding:8px 0; z-index:1;`.
+* Contains Previous/Next buttons and circular page buttons (32px) with active page background `#2196f3`.
+* Disabled buttons at edges show reduced opacity.
+* Pagination calculated from `filteredData.length / itemsPerPage` (default 10).
+
+---
+
+## Invoice Modal (PDF)
+
+* Triggered by clicking PDF icon on a card.
+* Modal: centered fixed dialog `width:250px` on mobile, white background, border-radius `8px`, padding `24px`, box-shadow `0 8px 24px rgba(0,0,0,0.2)` with backdrop overlay.
+* Modal captures `jobCardId` and `deliveryDate` from clicked card and stores in state.
+* Modal contents:
+
+  * Title: **Select Invoice Date** (font-size `18px`, font-weight `500`).
+  * Dropdown **Invoice Date** with three options: `Current Date`, `Delivery Date`, `Pick a Date`.
+  * Helper text: **"Select a date for the invoice"** (font-size `11px`).
+  * If `Pick a Date` selected, show native datepicker input (styled, value in `YYYY-MM-DD`).
+  * Submit button (full width, blue `#1976d2`) validates selection; on success format date per config and navigate to `/app/management/vehicle/jobcard/invoice/${jobCardId}`, passing `{invoiceDate, jobOrderId}` via `history.pushState` or query params.
+* Modal can be closed by backdrop click, Escape key, or Close button. When open, body scroll locked.
+
+---
+
+## Data & Storage
+
+* Load job history from `localStorage` key `jobHistory`, filter by `vehicleId` if provided.
+* Dates stored in `YYYY-MM-DD` format.
+* Config fallbacks:
+
+  * `config.globalisation.dateFormat` or `DD-MM-YYYY`
+  * `config.companyInfo.currencyCode` or `AED`
+  * `config.globalisation.numberFormat.code` or `en-US`
+
+---
+
+## Formatting & Utilities
+
+* Currency formatting via `Intl.NumberFormat` using currency code.
+* Hours formatting: convert decimal hours to `HH:MM` and vice versa.
+* Dates formatted per config or fallback.
 
 ---
 
 ## Filtering & Pagination Logic
 
-1. Build `filteredData` by applying in order:
-
-   * `searchQuery` (case-insensitive) against `holiday.name`, formatted `start_date`, and formatted `end_date`.
-   * Date range filters (`filterDates.startDate` / `filterDates.endDate`).
-2. Compute `totalPages = Math.ceil(filteredData.length / rowsPerPage)`.
-3. Slice current page: `filteredData.slice((currentPage-1)*rowsPerPage, currentPage*rowsPerPage)`.
-4. Render cards for the sliced array.
+* Filter flow: apply searchQuery against formatted dates/amounts and apply date filters (exact match) if provided.
+* Compute `totalPages = Math.ceil(filteredData.length / itemsPerPage)`.
+* Paginate results and render current page slice.
 
 ---
 
-## Edit / Delete Flows
+## Accessibility & UX
 
-* **Navigation Requirement**: When clicking the **Edit** or **Delete** icons on a holiday card, the user must be navigated to dedicated pages:
-
-  * Edit → `/app/settings/holiday/edit.html?id={holidayId}`
-  * Delete → `/app/settings/holiday/delete.html?id={holidayId}`
-    These navigations should occur immediately on icon click before entering any inline edit/delete mode.
-
----
-
-## Toasts
-
-* `createToast(message, type)` renders top-center toasts with green (`#16A34A`) for success and red (`#DC2626`) for error, auto-dismiss after 3s with fade animations.
-
----
-
-## UX Details & Accessibility
-
-* Inputs and controls use clear labels, proper touch targets, and accessible aria attributes.
-* Tooltips via `title` attribute for disabled actions (e.g., "Cannot edit past holidays").
-* Backdrop/tap-to-close behavior for popovers.
+* Tooltips for icon buttons.
+* Keyboard support: Escape closes modal; focus management for modal.
+* Toast notifications for validation and errors (top-center, auto-dismiss 3s).
+* Scroll lock when filter dialog or modal open.
 
 ---
 
 ## Implementation Notes
 
-* All localStorage reads/writes wrapped in `try/catch` with toasts on exceptions.
-* Dates stored in `localStorage` as `YYYY-MM-DD` strings.
-* Mobile layout reserves bottom padding to avoid content being hidden behind fixed pagination.
-* Console debug logs helpful events (edit, save, delete, filter changes).
+* All `localStorage` operations wrapped in `try/catch` with toast errors on failure.
+* Use `DOMContentLoaded` to initialize state and render UI.
+* Console.log major user actions for debugging (open modal, select date, navigate to invoice, filter, paginate).
 
 ---
 
 ## Output
 
-Produce a single self-contained HTML file with inline CSS and JavaScript that implements the Mobile Holiday Management View per the specification above.
+Produce a **single self-contained HTML file** with inline CSS and JS implementing the Mobile Job History View per the spec above.
 
-## Sample Mock Data
-
+## Sample data
 ```js
 [
   {
-    "id": "HLD-001",
-    "title": "New Year’s Day",
-    "type": "General",
-    "startDate": "2025-01-01",
-    "endDate": "2025-01-01",
-    "description": "National public holiday marking the start of the year",
-    "isActive": true
+    "jobCardId": "JC-1001",
+    "vehicleId": "VH-001",
+    "arrivalDate": "2025-01-05",
+    "deliveryDate": "2025-01-07",
+    "totalHours": "04:30",
+    "totalAmount": 820.50
   },
   {
-    "id": "HLD-002",
-    "title": "Republic Day",
-    "type": "General",
-    "startDate": "2025-01-26",
-    "endDate": "2025-01-26",
-    "description": "Indian Republic Day celebration",
-    "isActive": true
+    "jobCardId": "JC-1002",
+    "vehicleId": "VH-001",
+    "arrivalDate": "2025-02-10",
+    "deliveryDate": "2025-02-11",
+    "totalHours": "02:15",
+    "totalAmount": 460.00
   },
   {
-    "id": "HLD-003",
-    "title": "Good Friday",
-    "type": "General",
-    "startDate": "2025-04-18",
-    "endDate": "2025-04-18",
-    "description": "Christian religious holiday",
-    "isActive": true
+    "jobCardId": "JC-1003",
+    "vehicleId": "VH-001",
+    "arrivalDate": "2025-03-01",
+    "deliveryDate": "2025-03-03",
+    "totalHours": "06:45",
+    "totalAmount": 1250.00
   },
   {
-    "id": "HLD-004",
-    "title": "Eid al-Fitr",
-    "type": "Special",
-    "startDate": "2025-03-31",
-    "endDate": "2025-04-01",
-    "description": "Two-day special celebration at the end of Ramadan",
-    "isActive": true
+    "jobCardId": "JC-1004",
+    "vehicleId": "VH-002",
+    "arrivalDate": "2025-03-15",
+    "deliveryDate": "2025-03-16",
+    "totalHours": "03:30",
+    "totalAmount": 575.20
   },
   {
-    "id": "HLD-005",
-    "title": "Labour Day",
-    "type": "General",
-    "startDate": "2025-05-01",
-    "endDate": "2025-05-01",
-    "description": "International Workers’ Day",
-    "isActive": true
+    "jobCardId": "JC-1005",
+    "vehicleId": "VH-003",
+    "arrivalDate": "2025-04-02",
+    "deliveryDate": "2025-04-04",
+    "totalHours": "05:10",
+    "totalAmount": 980.75
   },
   {
-    "id": "HLD-006",
-    "title": "Onam",
-    "type": "Special",
-    "startDate": "2025-09-05",
-    "endDate": "2025-09-08",
-    "description": "Festival celebrated in Kerala",
-    "isActive": true
-  },
-  {
-    "id": "HLD-007",
-    "title": "Diwali",
-    "type": "Special",
-    "startDate": "2025-10-20",
-    "endDate": "2025-10-24",
-    "description": "Festival of lights",
-    "isActive": true
-  },
-  {
-    "id": "HLD-008",
-    "title": "Christmas",
-    "type": "General",
-    "startDate": "2025-12-25",
-    "endDate": "2025-12-25",
-    "description": "Christmas Day celebration",
-    "isActive": true
+    "jobCardId": "JC-1006",
+    "vehicleId": "VH-003",
+    "arrivalDate": "2025-04-25",
+    "deliveryDate": "2025-04-26",
+    "totalHours": "01:45",
+    "totalAmount": 300.00
   }
 ]
 ```
+
 ---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 125554.png'>
-<img src='./assets/Screenshot 2025-11-20 125608.png'>
-<img src='./assets/Screenshot 2025-11-20 125629.png'>
+<img src='./assets/Screenshot 2025-11-20 132131.png'>
+<img src='./assets/Screenshot 2025-11-20 132146.png'>

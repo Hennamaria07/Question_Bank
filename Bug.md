@@ -1,20 +1,27 @@
-# Bug Fix — Audio Not Playing
+# Bug Fix — Simple Calculator Not Working
 ## Task
 
-Fix so clicking Play actually plays the audio.
+Fix so selecting the operator performs correct calculation.
 
 ## Buggy Code
-``` html
+```html
 <!DOCTYPE html>
 <html>
 <body>
 
-<audio id="audio" src="song.mp3"></audio>
-<button id="play">Play</button>
+<input id="x" type="number">
+<select id="op">
+<option value="+">+</option>
+<option value="-">-</option>
+</select>
+<input id="y" type="number">
+<button id="cal">Calculate</button>
+<p id="res"></p>
 
 <script>
-document.getElementByID("play").click = () => {
-    audio.pla();
+cal.onclick = function() {
+    if(op == "+") res.innerHTML = x.value + y.value;
+    else res.innerHTML = x.value - y.value;
 }
 </script>
 
