@@ -1,7 +1,7 @@
-# Bug Fix — Button Disable Not Working
+# Bug Fix — Div Background Not Resetting
 ## Task
 
-Fix the bug where clicking "Disable" should disable the button.
+Fix the bug so clicking reset restores background to white.
 
 ## Buggy Code
 ``` html
@@ -9,13 +9,13 @@ Fix the bug where clicking "Disable" should disable the button.
 <html>
 <body>
 
-<button id="main">Click Me</button>
-<button id="disableBtn">Disable</button>
+<div id="box" style="width:100px;height:100px;background:green;"></div>
+<button id="reset">Reset</button>
 
 <script>
-document.getElementById("disableBtn").onclick = function() {
-    main.disable = true;
-}
+document.getElementById("reset").addEventListener("click", () => {
+    box.backgroundColor = "white";
+});
 </script>
 
 </body>
