@@ -1,7 +1,7 @@
-## Bug Fix — Button Double Click Not Detecting
+# Bug Fix — Image Not Rotating
 ## Task
 
-Fix the bug so double-clicking the button shows an alert.
+Fix the bug so clicking the button rotates the image by 45 degrees each time.
 
 ## Buggy Code
 ```html
@@ -9,12 +9,15 @@ Fix the bug so double-clicking the button shows an alert.
 <html>
 <body>
 
-<button id="btn">Double Click Me</button>
+<img id="img" src="https://via.placeholder.com/120" style="transition:0.3s;">
+<button id="rot">Rotate</button>
 
 <script>
-document.getElementById("btn").addEventListener("dbclick", function() {
-    alert("Double clicked!");
-});
+let angle = 0;
+rot.onclick = () => {
+    angle =+ 45;
+    img.style.tranform = "rotate(" + angle + "deg)";
+}
 </script>
 
 </body>
