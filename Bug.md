@@ -1,7 +1,7 @@
-# Bug Fix — Form Validation Not Working
+# Bug Fix — Remove Last List Item
 ## Task
 
-Fix so empty input shows an alert.
+Fix so clicking the button removes the last list item.
 
 ## Buggy Code
 ```html
@@ -9,16 +9,15 @@ Fix so empty input shows an alert.
 <html>
 <body>
 
-<form id="f">
-<input id="n" type="text">
-<button>Submit</button>
-</form>
+<ul id="list">
+  <li>A</li>
+  <li>B</li>
+</ul>
+<button id="rem">Remove Last</button>
 
 <script>
-document.getElementById("f").onsubmit = (e) => {
-    if(n.value = ""){
-        alert("Required");
-    }
+rem.onclick = () => {
+    list.removeChild(list.lastItem);
 }
 </script>
 
