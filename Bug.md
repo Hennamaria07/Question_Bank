@@ -1,7 +1,7 @@
-# Bug Fix — Alert Not Showing After 2 Seconds
+# Bug Fix — Text Not Showing After Button Click
 ## Task
 
-Fix the bug so an alert shows after 2 seconds when clicking the button.
+Fix the bug so clicking button displays the text typed in input.
 
 ## Buggy Code
 ``` html
@@ -9,13 +9,13 @@ Fix the bug so an alert shows after 2 seconds when clicking the button.
 <html>
 <body>
 
-<button id="wait">Wait 2 sec</button>
+<input id="i" type="text">
+<button id="show">Show</button>
+<p id="o"></p>
 
 <script>
-document.getElementById("wait").onclick = function(){
-    settimeout(() => {
-        alert("Done!");
-    }, 2000);
+document.getElementById("show").onclick = () => {
+    o.innerHTML = i.values;
 }
 </script>
 

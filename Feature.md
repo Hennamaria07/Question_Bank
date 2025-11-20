@@ -1,149 +1,125 @@
-# Suppliers Management
+# Edit Supplier — README
 
-Create a **single self-contained HTML file** (HTML + CSS + vanilla JavaScript) for **managing suppliers**. The page stores and displays supplier records in `localStorage` and is designed to be **easy to use, responsive, and visually appealing**.
+## Goal
+
+Create a **single self-contained HTML file** (HTML + CSS + vanilla JavaScript) to **edit an existing supplier**. The page reads from `localStorage.suppliers` and **auto-populates the form with the selected supplier's data by default**, allowing users to update supplier details. The UI should be **responsive, clean, and purple-themed**.
 
 ---
 
-## Container & Layout
+## Navigation & Header
 
-* Card-like container:
-  * Padding: 16px
-  * Background: `#F1F3F7`
-  * Rounded corners and soft shadow
-* Table layout:
-  * Responsive
-  * Pale header: `#D0D4F2`
-  * Uppercase bold headings
-  * Rounded first/last header corners
-  * Alternating row colors: odd → `#F7F6FE`, even → `#FFFFFF`
-  * Columns:
+* Page URL: `/app/settings/suppliers/edit/:supplierId.html`  
+  `:supplierId` is the ID of the supplier being edited.
+* Header:
+  * Back arrow (←) navigates to `/app/settings/suppliers/:userId.html`
+    * Shows a **confirmation dialog** if there are unsaved changes
+  * Page title: `"Edit Supplier"`
+
+---
+
+## Form Layout
+
+* Single centered form:
+  * Max width: 800px
+  * Background: `#E5E8FF`
+  * Responsive padding (reduced on screens <768px)
+* Top dropdown selector:
+  * Label: `"Select Supplier to Edit *"`
+  * Populates from `localStorage.suppliers`
+  * Option format: `"Supplier Name (SupplierID)"`
+* If no suppliers exist:
+  * Hide the form
+  * Show centered gray message: `"No suppliers found. Please add suppliers first."`
+* **Auto-population**:
+  * On page load, the form should automatically fill all fields with the selected supplier’s existing data from localStorage:
     * Supplier Name
-    * Supplier Id
+    * Supplier ID
     * Address Line 1
     * Address Line 2
-    * Contact Number
-    * Status (Active/Inactive badge)
-    * Actions (Edit button)
-* On smaller screens:
-  * Certain columns hide to keep layout readable
-  * Table becomes horizontally scrollable if necessary
+    * Contact Number (split into country code and number)
+    * Active status
 
 ---
 
-## Toolbar & Actions
+## Form Fields
 
-* Top-right toolbar:
-  * **Add button** navigates to `/app/settings/suppliers/add/{userId}.html`  
-    (userId is derived from URL)
-* Each row:
-  * **Edit button** navigates to `/app/settings/suppliers/edit/{supplierId}.html`
-  * Tooltips on action buttons
-* Status badges:
-  * `"Active"` → green badge
-  * `"Inactive"` → red badge
-
----
-
-## Features
-
-### Data Handling
-
-* On load:
-  * Ensure `localStorage.suppliers` exists (array of objects):
-    ```js
-    {
-      _id,
-      name,
-      supplierId,
-      contactNumber,
-      addressLine1,
-      addressLine2,
-      active, // true/false
-      userId
-    }
-    ```
-  * Load:
-    * **Paginated slice** for table display
-    * **Full list** for populating filter dropdowns
-
-* All localStorage operations use:
-  * `JSON.parse` / `JSON.stringify`
-  * `try/catch` with graceful fallbacks
+* Supplier Name (required)
+* Supplier ID (required, exactly 8 characters)
+* Address Line 1
+* Address Line 2
+* Contact Number:
+  * Stored as `"countryCode-number"` in localStorage
+  * Split into:
+    * Country code dropdown: `+971 UAE`, `+1 USA`, `+44 UK`, `+91 India`
+    * Number input field
+* Active Status:
+  * Custom toggle switch:
+    * Width: 50px, Height: 24px
+    * White circular slider moves left/right
+    * Gray background (`#ccc`) when inactive
+    * Green background (`#4CAF50`) when active
+  * Label dynamically displays `"Active"` / `"Inactive"`
 
 ---
 
-### Searching & Filtering
+## Buttons
 
-* **Live search**:
-  * Filters rows by `name`, `supplierId`, `addressLine1`, `addressLine2`, or `contactNumber`
-  * Resets page to 1 on change
-* **Column filters**:
-  * Supplier Name
-  * Supplier Id
-  * Dropdowns populated from full suppliers list
-  * Reset button clears filters
+* **Update** (dark purple: `#2A00B2`)
+* **Cancel** (white)
+  * Navigates back to `/app/settings/suppliers/:userId.html`
+  * Shows confirmation dialog if unsaved changes
 
 ---
 
-### Pagination
+## Validation Rules
 
-* Simulated on client side
-* Controls:
-  * Rows per page: 10, 20, 30, 40
-  * Previous / Next buttons
-  * Page indicator: current page / total pages
-  * Total count: “Showing X–Y of Z entries”
-* Pagination updates dynamically with search/filters
-
----
-
-### UI & Accessibility
-
-* Loading spinner while fetching data
-* Friendly message when no results: `"No records found / Try adjusting your search or filter criteria"`
-* Hover and focus transitions on buttons
-* Consistent padding and font sizes
-* Responsive design for phones and tablets
-* Visual cues:
-  * Green badge for Active
-  * Red badge for Inactive
+* All required fields must be filled
+* Supplier ID must be **exactly 8 characters**
+* Contact number must be **9–15 digits**
+* Error messages appear **below each field** in red (`#DC2626`)
+* On successful validation:
+  * Update supplier object in `localStorage.suppliers`
+  * Include name, supplierId, address lines, contact, and active status
+  * Show **success alert**: `"Supplier updated successfully!"`
+  * Refresh dropdown options (keep current supplier selected)
+  * Do not navigate away
 
 ---
 
-## Example Mock Data
+## UI & Styling
+
+* White input fields
+* Borders: `#D2D5DA`
+* Input height: 42px
+* Proper spacing between fields
+* Responsive for mobile:
+  * Form and inputs adjust width and padding below 768px
+
+---
+
+## Mock Data Example
 
 ```js
-// Initialize localStorage.suppliers if missing
 if (!localStorage.suppliers) {
   localStorage.suppliers = JSON.stringify([
     {
-      _id: "1",
+      _id: "SUP001",
       name: "Alpha Traders",
-      supplierId: "SUP001",
-      contactNumber: "+971501234567",
+      supplierId: "SUPP0001",
+      contactNumber: "+971-501234567",
       addressLine1: "Business Bay, Dubai",
       addressLine2: "Office 101",
       active: true,
       userId: "user123"
     },
     {
-      _id: "2",
+      _id: "SUP002",
       name: "Beta Supplies",
-      supplierId: "SUP002",
-      contactNumber: "+971502345678",
+      supplierId: "SUPP0002",
+      contactNumber: "+971-502345678",
       addressLine1: "Deira, Dubai",
       addressLine2: "Warehouse 5",
       active: false,
-      userId: "user123"
-    },
-    {
-      _id: "3",
-      name: "Gamma Corp",
-      supplierId: "SUP003",
-      contactNumber: "+971503456789",
-      addressLine1: "Jumeirah, Dubai",
-      addressLine2: "",
-      active: true,
       userId: "user123"
     }
   ]);
@@ -152,6 +128,4 @@ if (!localStorage.suppliers) {
 
 ---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 104742.png'>
-<img src='./assets/Screenshot 2025-11-20 104810.png'>
-<img src='./assets/Screenshot 2025-11-20 104829.png'>
+<img src='./assets/Screenshot 2025-11-20 110040.png'>
