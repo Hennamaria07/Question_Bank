@@ -1,181 +1,141 @@
-# Edit Vehicle Form — README
+# Mobile Vehicle Management List — README
 
 ## Goal
 
-Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) that implements an **Edit Vehicle Form**. The page must use the same layout, styles, and responsive behavior as the Add form and pre-populate fields from `localStorage`.
-
-This page will live at a route like:
-
-```
-/app/management/vehicle/edit.html?vehicleId={vehicleId}
-```
-
-
-## Loading & Data Fetching
-
-* On `DOMContentLoaded`, read the `vehicleId` from the URL (path or query parameter as appropriate).
-* Show a centered rotating **loading spinner** (100px diameter border animation) while fetching data from `localStorage['vehicleAccounts']`.
-
-  * Spinner styling: rotating border with colors `#5f8edb` and `#3B82F6`.
-* If the `vehicleId` is not found, show an error toast: **"Vehicle not found"** and redirect to the vehicle list page.
-* If found, pre-populate the form fields with the stored vehicle object and hide the spinner.
+Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) optimized for **mobile screens (≤ 600px)** that implements a **Vehicle Management List** UI. The component must display vehicles as cards, support search, filters, pagination, actions, and an expandable job-card details panel. Use `localStorage` for the data source.
 
 ---
 
 ## Layout & Visuals
 
-* Use the **same three-column layout** as the Add form (left/middle/right) and identical styling:
-
-  * Card background `#E5E8FF`, inputs white `#FFFFFF` with border `2px solid #D2D5DA`.
-  * Buttons, spacing, fonts and responsive breakpoints must match the Add form.
-* Back arrow at top-left that navigates to:
-
-```
-/app/management/vehicle/table/{vehicleId}
-```
+* Page background: `#F1F3F7` with side padding `16px` (mobile container). Reserve bottom padding `80px` to avoid overlapping pagination.
+* Cards: white background, `border-radius: 8px`, `padding: 16px`, `margin-bottom: 16px`, `box-shadow: 0 2px 4px rgba(0,0,0,0.1)`.
+* Fonts: `Helvetica, "Helvetica Neue", Arial, sans-serif`.
+* Touch-friendly controls: minimum 40px tap targets.
 
 ---
 
-## Form Fields (pre-populated)
+## Card Content
 
-All fields mirror the Add form but are pre-filled with saved values from the matched `vehicleAccounts` entry.
+Each vehicle card displays:
 
-### Primary Fields
+* **Plate Number** (title, 18px, bold)
+* **Status dot** (25px colored circle) next to plate
+* **Expand arrow** top-right toggles collapse/expand
+* **Brand** line prefixed with `Brand: ` (14px)
+* **VIN** line prefixed with `VIN: `
+* **Owner** line prefixed with `Owner: ` (firstname + lastname)
+* **Contact** line prefixed with `Contact: `
+* **Action** row (prefixed `Action:`) with five icon buttons horizontally:
 
-* **Plate No.** — pre-filled, editable. Validation: no spaces allowed, max 30 characters.
-* **VIN** — pre-filled, editable, max 30 characters.
-* **Vehicle Brand** — dropdown, pre-selected. Changing brand filters & resets the **Model** dropdown.
-* **Vehicle Model** — dropdown populated based on the selected brand; pre-selected to stored model.
-* **First Name** — pre-filled, max 30 characters.
-* **Last Name** — pre-filled, max 30 characters.
-* **Primary Contact Number** — stored as string like `+971-9876543210`; split on `-` to pre-select country code dropdown and fill the number input (validate 9–15 digits).
-* **WhatsApp Contact Number** — same split behavior; if stored value contains only country code like `+971-` display empty number input.
-* **Email** — pre-filled, max 50 chars, must be valid format.
-* **Company Fleet Name** — pre-filled if exists.
+  * **Job Card** (wrench)
+  * **Edit** (blue `#5B8FF9`) — navigates to the edit page or shows alert
+  * **Delete** (red `#FE7062`) — asks confirmation or navigates
+  * **History** (clock)
+  * **QR Code** (shows alert `QR Code generation clicked for {plateNumber}`)
 
-### Additional Fields (Accordion)
-
-Collapsed by default; expandable with smooth animation.
-
-* **Model Year**
-* **Engine Capacity**
-* **Color**
-* **Emirates**
-* **Insurance**
-* **Claim No**
-* **LPO No**
-
-All of the above pre-filled if existing in the stored object.
+Actions trigger alerts and `console.log` for debug.
 
 ---
 
-## Buttons & Actions
+## Expand / Collapse
 
-* **Update** (primary): replaces Save from Add form.
+* Tapping the expand arrow or card toggles a collapsible section (only one card expanded at a time).
+* Collapsed section shows **Current Job Card Details** or `No active job card` if none.
+* When active, show:
 
-  * Background `#2A00B2`, white text, same dimensions and styling as Save.
-  * On click: validate the form (rules below), then update the matching vehicle object in `localStorage['vehicleAccounts']` by `id`:
-
-    * Preserve `createdAt`.
-    * Add/update `updatedAt` with current datetime (ISO string).
-    * Merge changes into existing object.
-  * On successful update: show success toast **"Vehicle updated successfully"** and navigate to the vehicle list.
-* **Job Card**: performs the same validation and update as Update, then navigates to the job card creation flow (same as Add behavior).
-* **Cancel**: navigates back to the vehicle list without saving.
-
-All navigations should use `window.location.href`.
+  * Date Arrived (formatted `DD-MMM-YYYY`, e.g., `16-Oct-2024`)
+  * Advisor name
+  * Estimated Delivery date (formatted)
+  * Status text
+* Collapse/expand animated with `transition: height 300ms ease` for smooth UX.
 
 ---
 
-## Brand & Model Dialogs
+## Top Action Row & Search
 
-* Allow creating new brand/model pairs via a dialog identical to Add form's Brand/Model dialog.
-* Newly created brand/model entries are saved to `localStorage['customBrands']` (or merge with existing store) and immediately refresh the brand and model dropdowns, selecting the newly created item.
-* Prevent duplicate brand/model entries.
+* Fixed action row (top-right aligned) with three circular icon buttons (40px):
 
----
+  * **Filter** (FilterList icon) opens Mobile Filter Dialog
+  * **Export** (download icon) shows alert `Exporting vehicle data...`
+  * **Add** (plus icon) navigates to `/add/{userId}` and shows alert
+* Search bar below action row:
 
-## Country Code Handling
-
-* Country code dropdowns must contain ~50 country codes with flags and sorted names.
-* When pre-populating contact fields, split stored strings by `-`:
-
-  * Example: `+971-9876543210` → country code `+971` pre-selected, number `9876543210` populated.
-  * If stored WhatsApp is `+971-` or `+971` (no number), show the dropdown pre-selected and an empty number input.
+  * Full width, white background, `border: 1px solid #D2D5DA`, `border-radius: 8px`, `height: 48px`, `padding: 12px 16px`.
+  * Magnifying glass start adornment and placeholder `Search vehicles...`.
+  * Filters plate, brand, VIN, owner, contact in real time with debounce.
 
 ---
 
-## Validation Rules
+## Mobile Filter Dialog
 
-* **Plate No.**: required, no spaces, ≤ 30 characters.
-* **VIN**: required, ≤ 30 characters.
-* **First/Last Name**: required, ≤ 30 characters each.
-* **Email**: optional? (match Add form behavior) — if provided, must be valid and ≤ 50 chars.
-* **Primary Contact**: required, numeric, 9–15 digits (after splitting country code). Show specific inline error: **"Please check your primary mobile number and try again."**
-* **WhatsApp**: optional; if provided, same validation as primary.
-* **All fields must not exceed max lengths**; show inline red error messages under each invalid field.
-* On submit, if any required validation fails, show an overall error toast describing the issue.
+* Popover anchored to top-right (width `320px`) with backdrop (`rgba(0,0,0,0.4)`).
+* Header: `FILTERS` and blue `RESET` button. Close `X` top-right.
+* Two filters:
 
----
+  * **Brand**: autocomplete search box with placeholder `Search Brand` (width 240px).
+  * **Status**: native select (width 240px) with options:
 
-## Update Behavior & Edge Cases
-
-* Preserve `id` and `createdAt` when saving; set or update `updatedAt`.
-* If the user changes the brand, the model dropdown must reset (clear selection) and require a valid model selection before saving.
-* If user creates a new brand/model during edit, update dropdowns immediately and select the new values.
-* If the provided `vehicleId` is not found, show an error toast and redirect to the list page.
+    * All, Job card created, In-progress, On hold, Ready for delivery, Draft, None Active
+* RESET clears filters and sets page to 1.
+* Clicking outside backdrop closes dialog.
 
 ---
 
-## UX & Accessibility
+## Pagination (Fixed Bottom Bar)
 
-* Loading spinner centered and visible until DOM is populated.
-* Smooth transitions (300ms) for dropdowns, accordion expand/collapse, dialog open/close.
-* Country dropdowns should show flags and be keyboard accessible.
-* Keyboard focus management: focus first input after load; trap focus within dialogs while open.
+* Fixed at bottom: `background: #F1F3F7`, padding `12px 16px`, `box-shadow: 0 -2px 8px rgba(0,0,0,0.1)`, `z-index: 100`.
+* Shows `Page X of Y` (12px gray) and centered pagination controls:
 
----
-
-## Storage & API Surface
-
-* `localStorage['vehicleAccounts']`: array of vehicle objects. Update by finding the object with `id === vehicleId` and replacing/merging.
-* `localStorage['customBrands']`: array for user-added brands/models.
-* Wrap all `localStorage` reads/writes in `try/catch` and show toasts on failure.
-
-Example vehicle object shape:
-
-```json
-{
-  "id": "VH-001",
-  "plateNo": "KL-07-AB-1234",
-  "vin": "1HGCM82633A004352",
-  "brand": "Toyota",
-  "model": "Camry",
-  "firstName": "John",
-  "lastName": "Doe",
-  "primaryContact": "+971-9876543210",
-  "whatsapp": "+971-9876543210",
-  "email": "john.doe@example.com",
-  "companyFleet": "ABC Motors",
-  "additional": { "modelYear": "2019", "engineCapacity": "2.5L" },
-  "createdAt": "2025-07-01T12:00:00.000Z"
-}
-```
+  * Previous/Next buttons (white enabled, `#E0E0E0` disabled)
+  * Circular page buttons (32px): active `#2196f3` white text, inactive transparent with border `1px solid #ddd`.
+  * 10 cards per page; max 5 visible page buttons.
 
 ---
 
-## Feedback & Toasts
+## Data & Storage
 
-* Use top-center toast notifications for success (green) and errors (red), auto-dismiss after 3s.
-* Provide inline field-level error messages in red for validation failures.
+* Load 20 sample vehicles from `localStorage['vehicleAccounts']` (create if missing).
+* Each vehicle record includes:
+
+  * `id`, `plateNo`, `brand`, `model`, `vin`, `firstName`, `lastName`, `primaryContact`, `whatsapp`, `company`, `currentJobCard` (object or null), `status` (string)
+* Provide 20 sample entries included in the implementation for testing.
+
+---
+
+## Filtering & Search Logic
+
+* Combined filtering (search + brand + status): apply searchQuery (case-insensitive) across plate/brand/VIN/owner/contact then apply brand/status filters.
+* Debounce search input (e.g., 250ms) to avoid excessive re-renders.
+* Compute `totalPages = Math.ceil(filteredData.length / itemsPerPage)` and slice for current page.
+* Update pagination when filters/search change and reset to page 1.
+
+---
+
+## UX Details
+
+* Only one expanded card is allowed at a time (track `expandedCardId`).
+* Loading spinner shown while fetching data (centered, rotating border animation).
+* Status color mapping:
+
+  * Yellow `#fffd00`, Green `#7EF782`, Orange `#ff4e00`, Blue, Red, Gray `#A3A3A3`.
+  * Determine via job card status and estimated delivery vs. current date.
+* Smooth transitions (300ms) on collapse, filter dialog, and pagination.
+* Accessibility: buttons have `aria-label`, tooltips via `title`, large touch targets.
 
 ---
 
 ## Output
 
-Produce a **single self-contained HTML file** (e.g., `edit.html`) with inline CSS and JavaScript that implements the Edit Vehicle.
+Produce a **single self-contained HTML file** implementing the above Mobile Vehicle Management List. The file should include:
+
+* Inline CSS and JS
+* 20 sample vehicle records in `localStorage` for immediate testing
+* All interactions and alerts described above
 
 ---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 132750.png'>
-<img src='./assets/Screenshot 2025-11-20 132814.png'>
+<img src='./assets/Screenshot 2025-11-20 133438.png'>
+<img src='./assets/Screenshot 2025-11-20 133458.png'>
+<img src='./assets/Screenshot 2025-11-20 133513.png'>
+<img src='./assets/Screenshot 2025-11-20 133531.png'>

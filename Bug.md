@@ -1,20 +1,23 @@
-# Bug Fix — Dark Mode Not Applying
+# Bug Fix — Scroll to Top Not Working
 ## Task
 
-Fix so clicking button toggles dark mode.
+Fix the bug so clicking the button scrolls smoothly to the top.
 
 ## Buggy Code
 ```html
 <!DOCTYPE html>
 <html>
-<body>
+<body style="height:2000px;">
 
-<button id="dark">Dark Mode</button>
+<button id="top">Top</button>
 
 <script>
-document.getElementById("dark").addEventListener("click", function(){
-    document.body.classlist.toggle("dark");
-});
+document.getElementById("top").onclick = () => {
+    window.ScrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+}
 </script>
 
 </body>
