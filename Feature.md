@@ -1,131 +1,139 @@
-# Edit Supplier — README
+# Spare Parts Management
 
-## Goal
-
-Create a **single self-contained HTML file** (HTML + CSS + vanilla JavaScript) to **edit an existing supplier**. The page reads from `localStorage.suppliers` and **auto-populates the form with the selected supplier's data by default**, allowing users to update supplier details. The UI should be **responsive, clean, and purple-themed**.
+Create a **single self-contained HTML page** (HTML + CSS + vanilla JavaScript) to manage **Spare Parts**. The page reads and writes data to `localStorage.spareParts` and is fully interactive with **search, filter, and pagination**. The design should be modern, clean, and responsive with a purple-themed style.
 
 ---
 
 ## Navigation & Header
 
-* Page URL: `/app/settings/suppliers/edit/:supplierId.html`  
-  `:supplierId` is the ID of the supplier being edited.
-* Header:
-  * Back arrow (←) navigates to `/app/settings/suppliers/:userId.html`
-    * Shows a **confirmation dialog** if there are unsaved changes
-  * Page title: `"Edit Supplier"`
+* Page URL: `/app/settings/spareparts/:userId`  
+  `:userId` is used for routing the Add/Edit pages.
+* Header Section:
+  * Back arrow (←) navigates to the previous page
+  * Page title: `"Spare Parts Management"`
 
 ---
 
-## Form Layout
+## Toolbar
 
-* Single centered form:
-  * Max width: 800px
-  * Background: `#E5E8FF`
-  * Responsive padding (reduced on screens <768px)
-* Top dropdown selector:
-  * Label: `"Select Supplier to Edit *"`
-  * Populates from `localStorage.suppliers`
-  * Option format: `"Supplier Name (SupplierID)"`
-* If no suppliers exist:
-  * Hide the form
-  * Show centered gray message: `"No suppliers found. Please add suppliers first."`
-* **Auto-population**:
-  * On page load, the form should automatically fill all fields with the selected supplier’s existing data from localStorage:
-    * Supplier Name
-    * Supplier ID
-    * Address Line 1
-    * Address Line 2
-    * Contact Number (split into country code and number)
-    * Active status
+* Positioned below header
+* Left: Search input with placeholder `"Search parts..."` and search icon
+* Right: 
+  * **Filter** button (with filter icon)
+    * Opens a popover/dropdown panel below the button
+    * Contains:
+      * Seller Name dropdown (options from `localStorage.suppliers`, includes `"All"`)
+      * RESET button (clears filters)
+      * Close (X) icon
+  * **Add** button (with + icon)
+    * Navigates to `/app/settings/spareparts/add/:userId`
 
 ---
 
-## Form Fields
+## Table Container
 
-* Supplier Name (required)
-* Supplier ID (required, exactly 8 characters)
-* Address Line 1
-* Address Line 2
-* Contact Number:
-  * Stored as `"countryCode-number"` in localStorage
-  * Split into:
-    * Country code dropdown: `+971 UAE`, `+1 USA`, `+44 UK`, `+91 India`
-    * Number input field
-* Active Status:
-  * Custom toggle switch:
-    * Width: 50px, Height: 24px
-    * White circular slider moves left/right
-    * Gray background (`#ccc`) when inactive
-    * Green background (`#4CAF50`) when active
-  * Label dynamically displays `"Active"` / `"Inactive"`
+* Card-style container:
+  * Background: `#FFFFFF`
+  * Border-radius: 15px
+  * Box-shadow: subtle
+  * Margin: 30px left/right
+* Table Columns:
+  | Column      | Description |
+  |------------|-------------|
+  | Part Name  | Name of the part |
+  | Part Code  | Unique part code |
+  | Description | Part description |
+  | Price      | Right-aligned, formatted to 2 decimals, includes currency symbol (e.g., AED) |
+  | Qty        | Right-aligned quantity |
+  | Seller Name | Vendor or supplier name |
+  | Exp Date   | Formatted as DD-MM-YYYY |
+  | Status     | Rounded pill: `"Active"` in green (#E8F5E9), `"Inactive"` in red (#FFEBEE) |
+  | Actions    | Edit icon (blue pencil) |
 
----
-
-## Buttons
-
-* **Update** (dark purple: `#2A00B2`)
-* **Cancel** (white)
-  * Navigates back to `/app/settings/suppliers/:userId.html`
-  * Shows confirmation dialog if unsaved changes
-
----
-
-## Validation Rules
-
-* All required fields must be filled
-* Supplier ID must be **exactly 8 characters**
-* Contact number must be **9–15 digits**
-* Error messages appear **below each field** in red (`#DC2626`)
-* On successful validation:
-  * Update supplier object in `localStorage.suppliers`
-  * Include name, supplierId, address lines, contact, and active status
-  * Show **success alert**: `"Supplier updated successfully!"`
-  * Refresh dropdown options (keep current supplier selected)
-  * Do not navigate away
+* Row Styling:
+  * Odd rows: `#F7F6FE`
+  * Even rows: `#FFFFFF`
+  * No visible borders
+* Header Styling:
+  * Bold uppercase text
+  * Background: `#FFFFFF`
+  * Padding: 16px
 
 ---
 
-## UI & Styling
+## Filtering & Search
 
-* White input fields
-* Borders: `#D2D5DA`
-* Input height: 42px
-* Proper spacing between fields
-* Responsive for mobile:
-  * Form and inputs adjust width and padding below 768px
+* **Search**:
+  * Filters displayed data as the user types
+  * Matches Part Name, Part Code, Description (case-insensitive)
+* **Filter**:
+  * Seller Name dropdown
+  * Current filters stored in a JavaScript object
+  * Filter applied dynamically on data array
+  * RESET button clears filters and restores full data
 
 ---
 
-## Mock Data Example
+## Pagination
 
+* Client-side pagination at bottom of table
+* Controls:
+  * Rows per page dropdown: 10 / 20 / 30 / 40
+  * "Page X of Y" text
+  * Previous / Next arrow buttons
+* Implementation:
+  * Slice the filtered data array based on current page and rows per page
+
+---
+
+## Actions
+
+* Edit:
+  * Clicking pencil icon navigates to `/app/settings/spareparts/edit/:partId`
+
+---
+
+## Data Structure
+
+* LocalStorage key: `spareParts`
+* Array of objects with properties:
 ```js
-if (!localStorage.suppliers) {
-  localStorage.suppliers = JSON.stringify([
-    {
-      _id: "SUP001",
-      name: "Alpha Traders",
-      supplierId: "SUPP0001",
-      contactNumber: "+971-501234567",
-      addressLine1: "Business Bay, Dubai",
-      addressLine2: "Office 101",
-      active: true,
-      userId: "user123"
-    },
-    {
-      _id: "SUP002",
-      name: "Beta Supplies",
-      supplierId: "SUPP0002",
-      contactNumber: "+971-502345678",
-      addressLine1: "Deira, Dubai",
-      addressLine2: "Warehouse 5",
-      active: false,
-      userId: "user123"
-    }
-  ]);
-}
+[
+  {
+    _id: "SUP001",
+    name: "Alpha Traders",
+    supplierId: "ALP12345",
+    contactNumber: "+971-555123456",
+    addressLine1: "123 Main Street",
+    addressLine2: "Dubai",
+    active: true,
+    userId: "USR001"
+  },
+  {
+    _id: "SUP002",
+    name: "Beta Supplies",
+    supplierId: "BET67890",
+    contactNumber: "+971-555987654",
+    addressLine1: "456 Industrial Area",
+    addressLine2: "Sharjah",
+    active: true,
+    userId: "USR002"
+  },
+  {
+    _id: "SUP003",
+    name: "Gamma Parts",
+    supplierId: "GAM11223",
+    contactNumber: "+971-555112233",
+    addressLine1: "789 Trade Road",
+    addressLine2: "Abu Dhabi",
+    active: false,
+    userId: "USR003"
+  }
+]
+
 ```
 
 ---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 110040.png'>
+<img src='./assets/Screenshot 2025-11-20 110620.png'>
+<img src='./assets/Screenshot 2025-11-20 110646.png'>
