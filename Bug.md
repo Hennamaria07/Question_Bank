@@ -1,24 +1,21 @@
-# Bug Fix — Remove Last List Item
+# Bug Fix — Paragraph Not Showing Length of Input
 ## Task
 
-Fix so clicking the button removes the last list item.
+Fix so typing shows live character count.
 
 ## Buggy Code
-```html
+``` html
 <!DOCTYPE html>
 <html>
 <body>
 
-<ul id="list">
-  <li>A</li>
-  <li>B</li>
-</ul>
-<button id="rem">Remove Last</button>
+<input id="text">
+<p id="len"></p>
 
 <script>
-rem.onclick = () => {
-    list.removeChild(list.lastItem);
-}
+text.addEventListener("input", () => {
+    len.innerHTML = text.length;
+});
 </script>
 
 </body>
