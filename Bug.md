@@ -1,23 +1,20 @@
-# Bug Fix — Scroll to Top Not Working
+## Bug Fix — Button Double Click Not Detecting
 ## Task
 
-Fix the bug so clicking the button scrolls smoothly to the top.
+Fix the bug so double-clicking the button shows an alert.
 
 ## Buggy Code
 ```html
 <!DOCTYPE html>
 <html>
-<body style="height:2000px;">
+<body>
 
-<button id="top">Top</button>
+<button id="btn">Double Click Me</button>
 
 <script>
-document.getElementById("top").onclick = () => {
-    window.ScrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-}
+document.getElementById("btn").addEventListener("dbclick", function() {
+    alert("Double clicked!");
+});
 </script>
 
 </body>

@@ -1,141 +1,149 @@
-# Mobile Vehicle Management List — README
+# View Employee Profile — README
 
 ## Goal
 
-Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) optimized for **mobile screens (≤ 600px)** that implements a **Vehicle Management List** UI. The component must display vehicles as cards, support search, filters, pagination, actions, and an expandable job-card details panel. Use `localStorage` for the data source.
+Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) that implements a **View Employee Profile** page in read-only mode. The page must load an employee by `userId` from the URL (`/app/management/employees/view/:userId`) and display all profile details in a clean two-column layout on desktop and responsive stacks on smaller screens.
 
 ---
 
-## Layout & Visuals
+## Layout Overview
 
-* Page background: `#F1F3F7` with side padding `16px` (mobile container). Reserve bottom padding `80px` to avoid overlapping pagination.
-* Cards: white background, `border-radius: 8px`, `padding: 16px`, `margin-bottom: 16px`, `box-shadow: 0 2px 4px rgba(0,0,0,0.1)`.
-* Fonts: `Helvetica, "Helvetica Neue", Arial, sans-serif`.
-* Touch-friendly controls: minimum 40px tap targets.
+* **Two-column layout** for screens ≥ 1024px.
 
----
-
-## Card Content
-
-Each vehicle card displays:
-
-* **Plate Number** (title, 18px, bold)
-* **Status dot** (25px colored circle) next to plate
-* **Expand arrow** top-right toggles collapse/expand
-* **Brand** line prefixed with `Brand: ` (14px)
-* **VIN** line prefixed with `VIN: `
-* **Owner** line prefixed with `Owner: ` (firstname + lastname)
-* **Contact** line prefixed with `Contact: `
-* **Action** row (prefixed `Action:`) with five icon buttons horizontally:
-
-  * **Job Card** (wrench)
-  * **Edit** (blue `#5B8FF9`) — navigates to the edit page or shows alert
-  * **Delete** (red `#FE7062`) — asks confirmation or navigates
-  * **History** (clock)
-  * **QR Code** (shows alert `QR Code generation clicked for {plateNumber}`)
-
-Actions trigger alerts and `console.log` for debug.
+  * **Left section** (flex: 2, min-width: 20rem): white card with padding `20px`.
+  * **Right section** (flex: 3, min-width: 50rem): main profile view card with header and read-only fields.
+* No border-left between columns.
+* Page background `#F1F3F7`; card background `#E5E8FF` with `box-shadow: 0px 4px 4px rgba(0,0,0,0.25)` and `border-radius: 10px`.
 
 ---
 
-## Expand / Collapse
+## Left Section (Profile Summary)
 
-* Tapping the expand arrow or card toggles a collapsible section (only one card expanded at a time).
-* Collapsed section shows **Current Job Card Details** or `No active job card` if none.
-* When active, show:
+* White card area containing:
 
-  * Date Arrived (formatted `DD-MMM-YYYY`, e.g., `16-Oct-2024`)
-  * Advisor name
-  * Estimated Delivery date (formatted)
-  * Status text
-* Collapse/expand animated with `transition: height 300ms ease` for smooth UX.
+  * Circular profile image placeholder (60% width of the left card):
 
----
+    * Desktop: `200px` diameter
+    * Tablet: `150px`
+    * Mobile: `100px`
+  * **Update Authentication Image** button:
 
-## Top Action Row & Search
-
-* Fixed action row (top-right aligned) with three circular icon buttons (40px):
-
-  * **Filter** (FilterList icon) opens Mobile Filter Dialog
-  * **Export** (download icon) shows alert `Exporting vehicle data...`
-  * **Add** (plus icon) navigates to `/add/{userId}` and shows alert
-* Search bar below action row:
-
-  * Full width, white background, `border: 1px solid #D2D5DA`, `border-radius: 8px`, `height: 48px`, `padding: 12px 16px`.
-  * Magnifying glass start adornment and placeholder `Search vehicles...`.
-  * Filters plate, brand, VIN, owner, contact in real time with debounce.
+    * Background `#2A00B2`, white text.
+    * On click: alert **"Face recognition update feature - Coming soon!"**.
+  * Employee full name prominently in bold.
+  * Employee ID displayed below name.
+  * **QR code** section showing employee ID as plain text (no generation required).
 
 ---
 
-## Mobile Filter Dialog
+## Right Section (Profile View — Read-only)
 
-* Popover anchored to top-right (width `320px`) with backdrop (`rgba(0,0,0,0.4)`).
-* Header: `FILTERS` and blue `RESET` button. Close `X` top-right.
-* Two filters:
+* Header: **Profile View** (prominent)
+* Display employee fields as **disabled/read-only inputs** with the following styles:
 
-  * **Brand**: autocomplete search box with placeholder `Search Brand` (width 240px).
-  * **Status**: native select (width 240px) with options:
+  * Disabled input background: `#f9f9f9`
+  * Border: `2px solid #D2D5DA`
+  * Height: `42px`, padding `0 12px`, font-size `16px`
+  * Label: font-size `16px`, font-weight `500`, color `#6D7280`
 
-    * All, Job card created, In-progress, On hold, Ready for delivery, Draft, None Active
-* RESET clears filters and sets page to 1.
-* Clicking outside backdrop closes dialog.
+### Fields to display
 
----
+* Full Name (disabled input)
+* Employee ID (disabled input)
+* Primary Contact Number (disabled) — display as `+<code> <flag> - <number>` if possible (e.g. `+971 🇦🇪 - 9876543210`)
+* Secondary Contact Number (disabled) — show only if exists, otherwise show `Not specified`
+* Selected Reports (display comma-separated text) — show only if employee has Reports role; otherwise `Not specified`
+* Default Entry Page (disabled input showing menu name, not ID)
+* Designation (disabled input)
+* Employee Type (disabled input)
+* Company (disabled input, only visible if Employee Type is `Contract`)
 
-## Pagination (Fixed Bottom Bar)
-
-* Fixed at bottom: `background: #F1F3F7`, padding `12px 16px`, `box-shadow: 0 -2px 8px rgba(0,0,0,0.1)`, `z-index: 100`.
-* Shows `Page X of Y` (12px gray) and centered pagination controls:
-
-  * Previous/Next buttons (white enabled, `#E0E0E0` disabled)
-  * Circular page buttons (32px): active `#2196f3` white text, inactive transparent with border `1px solid #ddd`.
-  * 10 cards per page; max 5 visible page buttons.
-
----
-
-## Data & Storage
-
-* Load 20 sample vehicles from `localStorage['vehicleAccounts']` (create if missing).
-* Each vehicle record includes:
-
-  * `id`, `plateNo`, `brand`, `model`, `vin`, `firstName`, `lastName`, `primaryContact`, `whatsapp`, `company`, `currentJobCard` (object or null), `status` (string)
-* Provide 20 sample entries included in the implementation for testing.
+All inputs must be non-editable and visually indicate disabled state.
 
 ---
 
-## Filtering & Search Logic
+## Data Loading & Lookup
 
-* Combined filtering (search + brand + status): apply searchQuery (case-insensitive) across plate/brand/VIN/owner/contact then apply brand/status filters.
-* Debounce search input (e.g., 250ms) to avoid excessive re-renders.
-* Compute `totalPages = Math.ceil(filteredData.length / itemsPerPage)` and slice for current page.
-* Update pagination when filters/search change and reset to page 1.
+* On page mount (`DOMContentLoaded`):
+
+  1. Read `userId` from the URL path or query parameter.
+  2. Load `localStorage['employees']` (or `localStorage['employeesData']`) and find the employee object with `id === userId`.
+  3. If not found: show error toast **"Employee not found"** and stop (optionally navigate away).
+  4. If found: populate UI with employee data.
+
+* For fields stored as IDs (roles, designation, employeeType, company, entryPage, authorizations):
+
+  * Load reference collections from localStorage (e.g., `roles`, `designations`, `employeeTypes`, `companies`, `menuItems`).
+  * Match the stored IDs and display the human-readable `name` values. If lookup not found, display `Not specified`.
+
+* For phone numbers stored as strings like `+971-9876543210`:
+
+  * Split on `-` delimiter, find the country code in `countries` reference (localStorage or embedded list) to show flag emoji or short name.
+  * Display as `+971 🇦🇪 - 9876543210`.
+  * If number part missing, show `Not specified`.
 
 ---
 
-## UX Details
+## Interaction & Behavior
 
-* Only one expanded card is allowed at a time (track `expandedCardId`).
-* Loading spinner shown while fetching data (centered, rotating border animation).
-* Status color mapping:
+* **Update Authentication Image** button: only interactive control — on click show alert **"Face recognition update feature - Coming soon!"**.
+* No Save/Cancel or other edit controls on this page.
+* Show a centered **loading spinner** while fetching and preparing data. The spinner should be visible until data is rendered.
+* If fields are empty, display `Not specified` placeholder text.
 
-  * Yellow `#fffd00`, Green `#7EF782`, Orange `#ff4e00`, Blue, Red, Gray `#A3A3A3`.
-  * Determine via job card status and estimated delivery vs. current date.
-* Smooth transitions (300ms) on collapse, filter dialog, and pagination.
-* Accessibility: buttons have `aria-label`, tooltips via `title`, large touch targets.
+---
+
+## Styling & Responsiveness
+
+* Desktop (≥1024px): two-column layout described above.
+* ≤1020px: profile sidebar arranges horizontally with a `100px` image; sections stack vertically beneath header.
+* ≤768px: sections become full width stacked vertically with compact spacing.
+* ≤600px: profile sidebar stacks vertically with `150px` image and larger touch targets.
+* Use smooth transitions (`transition: all 0.3s ease`) for layout changes.
+
+---
+
+## Accessibility
+
+* Inputs have `aria-readonly` or `disabled` attributes.
+* Provide `alt` text for profile image.
+* Button has `aria-label`.
+* Ensure color contrast for readability.
+
+---
+
+## Error Handling & Toasts
+
+* Implement `createToast(message, type)` for top-center notifications. Use green background for success and red for errors.
+* Wrap `localStorage` reads in `try/catch` and show an error toast if data cannot be parsed.
+
+---
+
+## Example Employee Object Shape
+
+```json
+{
+  "id": "U1001",
+  "fullName": "Anees K",
+  "employeeId": "EMP010",
+  "primaryContact": "+971-9876543210",
+  "secondaryContact": "+971-9876500010",
+  "roles": ["role_reports"],
+  "authorizations": ["Dashboard","Services"],
+  "entryPage": "Employee Management",
+  "designation": "Technician",
+  "employeeType": "Permanent",
+  "company": "ABC Motors"
+}
+```
 
 ---
 
 ## Output
 
-Produce a **single self-contained HTML file** implementing the above Mobile Vehicle Management List. The file should include:
-
-* Inline CSS and JS
-* 20 sample vehicle records in `localStorage` for immediate testing
-* All interactions and alerts described above
+Produce a single self-contained HTML file with inline CSS and JavaScript implementing the above **View Employee Profile** read-only page. Use the uploaded reference image at:
 
 ---
+
 ## Image
-<img src='./assets/Screenshot 2025-11-20 133438.png'>
-<img src='./assets/Screenshot 2025-11-20 133458.png'>
-<img src='./assets/Screenshot 2025-11-20 133513.png'>
-<img src='./assets/Screenshot 2025-11-20 133531.png'>
+<img src='./assets/Screenshot 2025-10-21 162724.png'>
