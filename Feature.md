@@ -1,143 +1,234 @@
-# Add Suppliers 
+# Mobile Holiday Management — README
 
-## Overview
+## Goal
 
-Create a **single-page Add Suppliers** interface for the fleet management app at the route:
-
-```
-/app/settings/suppliers/:userId/add
-```
-
-Replace `:userId` with the current logged-in user's id. The page stores temporary suppliers in `localStorage` under `tempSuppliers` and final suppliers under `suppliers`.
-
-Reference image (optional):
-
-```
-/mnt/data/1553f955-955f-4642-91f4-74dc45e7f61e.png
-```
+Create a **single self-contained HTML file** (HTML + inline CSS + inline JavaScript) optimized for **mobile screens below 600px** that implements a **Holiday Management View** using `localStorage` for persistence. The component must follow a clean, purple-accent theme and provide search, filtering, edit/delete, and pagination controls tailored for mobile UX.
 
 ---
 
-## Layout
+## Container & Page Layout
 
-* **Header**: back-arrow (←) at top-left that navigates to `/app/settings/suppliers/:userId` and the page title **Add Suppliers**.
-* **Main content**: two responsive sections inside a centered card with padding, rounded corners, and shadow:
-
-  * **Left (form)** — `flex: 3` — Add Supplier form.
-  * **Right (preview list)** — `flex: 2` — Temporarily added suppliers displayed as cards. This section is only visible when there is at least one supplier in `tempSuppliers`.
-
-### Responsive behavior
-
-* **Desktop / wide**: two-column layout — form left, preview right.
-* **Mobile (<768px)**: stacked vertically **with the suppliers list appearing above the form**.
+* Page container: `padding: 16px`, background `#F1F3F7`, `min-height: 100vh`.
+* Mobile-first design targeting screens `< 600px`.
 
 ---
 
-## Form Fields (all required)
+## Header Controls
 
-* Supplier Name — text input
-* Supplier ID — **exactly 8 characters** (text input)
-* Address Line 1 — text input
-* Address Line 2 — text input
-* Contact Number — composed of:
+* Top header: `display: flex; justify-content: space-between; margin-bottom: 16px;`
 
-  * Country code dropdown (default `+971` UAE; other options: `+1` USA, `+44` UK, `+91` India)
-  * Phone number input (digits only, 9–15 digits)
+* **Left:** Two toggle switches for **SUN** and **SAT**:
 
-> Every field must show a red asterisk (*) as required. Input validation messages appear below fields in red (#DC2626).
+  * Inline-flex, gap `4px`, label font-size `14px`, color `#404040`.
+  * Custom toggle checkbox: rounded toggle `width: 44px; height: 24px;`.
+  * Unchecked background `#ccc`; checked background `#2196f3`.
+  * Slider circle `20px`, white, transition `0.3s`.
+  * Toggle state is read from and saved to `localStorage` key `weekdays` (JSON array of objects `{dayNumber, active}` where `0` is Sunday and `6` is Saturday).
+  * On change update `weekdays` in `localStorage`, update local weekdays state and UI.
+  * Label margin-left approx `-0.2` for tight spacing.
 
----
+* **Right:** Two icon buttons:
 
-## Buttons & Actions
-
-* **Add** (in the form): when clicked, validate all fields; if valid, append the supplier object to `tempSuppliers` in `localStorage` and render a supplier card on the right. Do **not** persist to `suppliers` yet.
-* **Each supplier card** has a close (×) icon at the top-right — clicking removes that supplier from `tempSuppliers` and updates localStorage and UI.
-* **Save All** (appears at the bottom of the right preview section when one or more temp suppliers exist): validates that at least one supplier exists, merges `tempSuppliers` into existing `suppliers` array in localStorage (deduplicating if desired), clears `tempSuppliers`, shows success alert, and navigates back to `/app/settings/suppliers/:userId`.
-* **Back arrow**: when clicked, if `tempSuppliers` is non-empty, prompt a confirmation dialog warning about losing unsaved changes; if user confirms, navigate back, otherwise stay on page.
-* **Cancel** (optional) in the form resets the form fields.
+  * **Filter** button (40×40 circle). On click open filter popover/overlay (`filterAnchorEl` state).
+  * **Add** button (40×40 circle). On click navigate to `/app/settings/holiday/config` via `window.location.href`.
+  * Both buttons: hover opacity `0.7`.
 
 ---
 
-##localStorage
+## Search Input
 
-* **tempSuppliers** (temporary array stored in localStorage):
+* Full-width search below header:
 
-```js
-[
-  {
-    id: 'TS-1635500000', // local id (timestamp-based or UUID)
-    name: 'Supplier A',
-    supplierId: 'ABCD1234',
-    address1: '123 Main St',
-    address2: 'Unit 4',
-    countryCode: '+971',
-    phone: '501234567',
-    fullContact: '+971-501234567'
-  },
-  ...
-]
-```
-
-* **suppliers** (final persistent array): similar structure. `Save All` merges `tempSuppliers` into this key.
-
-All localStorage reads/writes must use `JSON.parse()` / `JSON.stringify()` inside `try/catch` blocks and show toasts or alerts on failure.
+  * `width: 100%`, `height: 40px`, padding `0 12px 0 40px`, border `2px solid #D2D5DA`, border-radius `6px`, background `#FFFFFF`, font-size `14px`.
+  * Left-positioned search icon (`position: absolute; left: 12px; top: 50%; transform: translateY(-50%);`).
+  * Placeholder: **"Search holidays..."**.
+  * Value bound to `searchQuery` state; on change filter displayed cards and reset `currentPage` to 1.
 
 ---
 
-## Validation Rules
+## Holiday Cards List
 
-* All fields are required.
-* Supplier ID must be exactly **8 characters**; otherwise show inline error: **"Supplier ID must be 8 characters"**.
-* Contact number (phone input) must be **9–15 digits**; show error: **"Please enter a valid phone number (9–15 digits)"**.
-* Country code dropdown must have a value (default `+971`).
-* On Add, if validation fails, focus the first invalid field and show appropriate inline error messages in red (#DC2626).
+* Vertical stack of cards with `gap: 16px`.
+* Each card style: background `#FFFFFF`, border-radius `8px`, padding `16px`, box-shadow `0 2px 4px rgba(0,0,0,0.1)`.
 
----
+### Card Header
 
-## UI & Styling
+* `display:flex; justify-content: space-between; align-items: center;`
+* **Left:** Event name (`h6`): font-size `18px`, bold, max-width `200px`, ellipsis overflow.
 
-* Page background: `#F1F3F7`.
-* Form and preview card background: `#E5E8FF`, rounded corners `10px`, box-shadow for depth.
-* Inputs: white background `#FFFFFF`, border `2px solid #D2D5DA`, border-radius `6px`.
-* Add button: background `#91B3FA` (light blue).
-* Save All button: background `#2A00B2` (dark purple), white text.
-* Cancel button: white background.
-* Temporary supplier cards: background `#F2F2F2`, rounded corners, padding, show supplier details with name as heading.
-* Error messages: color `#DC2626`.
+  * When editing (`isEditing` true) show input field instead (200px wide, 32px high) bound to `holiday.name`.
+* **Right:** Action icons container (`display:flex; gap:8px`):
 
----
+  * Editing state shows **Save** (green) and **Cancel** (red-ish) icons.
+  * Delete state shows **Delete** (red) and **Cancel** icons.
+  * Default shows **Edit** (blue) and **Delete** icons.
+  * Edit is disabled for past holidays (`status === "Over"`) — gray, `cursor:not-allowed`, tooltip `Cannot edit past holidays`.
 
-## User Flow Example
+### Card Content
 
-1. User fills in form fields and clicks **Add**.
-2. Form validates fields; if valid, the supplier object is appended to `tempSuppliers` and saved in localStorage.
-3. The right-side preview appears (if it wasn't visible) showing cards for each temp supplier.
-4. User may remove cards by clicking × — that updates `tempSuppliers` immediately.
-5. When ready, the user clicks **Save All** which merges temp suppliers into `suppliers` and navigates back to the suppliers list.
+* Grid layout with gap `12px`.
+* **Start Date** and **End Date** sections:
+
+  * If editing: show native `type=date` inputs (height 42px, border `2px solid #D2D5DA`, border-radius `6px`). End Date `min` bound to Start Date.
+  * If not editing: show label `Start Date:` / `End Date:` and formatted date value using `config.globalisation.dateFormat` (fallback `DD-MM-YYYY`).
+* **Status chip:** small rounded badge showing **Over** (red `#FF0000`), **Upcoming** (orange `#FFA500`), or **Ongoing** (green `#008000`) determined by comparing today with start/end dates.
 
 ---
 
-## Edge Cases & Notes
+## Empty State
 
-* If `tempSuppliers` already exists on page load, pre-populate the preview list from localStorage so users don't lose progress on refresh.
-* Consider de-duplicating supplier IDs on Save All (optional but recommended): if a supplier with the same `supplierId` exists in `suppliers`, either skip or update it — decide behavior and document it in UI (e.g., show a confirmation).
-* Navigation must include the `:userId` path; ensure the back arrow constructs the URL correctly.
+* If filtered results are empty show a centered card:
+
+  * `h6`: "No records found" (18px, `#404040`)
+  * `p`: "Try adjusting your search or filter criteria" (14px, `#666`)
 
 ---
 
-## Accessibility
+## Filter Popover (Mobile)
 
-* Provide `aria-label` on the back arrow and close icons.
-* Ensure form labels are associated with inputs.
-* Keyboard accessible controls for adding/removing cards and Save All.
+* Fullscreen overlay (`position: fixed; top:0; left:0; width:100vw; height:100vh; background: rgba(0,0,0,0.5); z-index:1000`) that can be closed by tapping the backdrop.
+* Centered filter panel (`width:320px; max-height:80vh; background:#FFF; border-radius:8px; padding:16px`) with:
+
+  * Header: **FILTERS** label and **RESET** button that clears date filters and resets `currentPage`.
+  * Close button to dismiss.
+  * Body: two date inputs (Start, End). Changing dates immediately filters displayed data; End date `min` bound to Start date.
+* When open, apply scroll lock: `document.body.style.overflow = 'hidden'`; restore on close.
+
+---
+
+## Pagination (Fixed Bottom Bar)
+
+* Fixed bottom bar (`position: fixed; bottom:0; left:0; right:0; background:#F1F3F7; padding:12px 0; z-index:100`) with controls centered.
+* Previous/Next circular buttons (32px) with disabled state when at edges (opacity 0.5, `cursor:not-allowed`).
+* Page number buttons (32px circular) showing up to 5 pages with ellipses for larger ranges. Active page background `#2196f3` with white text.
+* Only show when `totalPages > 0`.
+
+---
+
+## Filtering & Pagination Logic
+
+1. Build `filteredData` by applying in order:
+
+   * `searchQuery` (case-insensitive) against `holiday.name`, formatted `start_date`, and formatted `end_date`.
+   * Date range filters (`filterDates.startDate` / `filterDates.endDate`).
+2. Compute `totalPages = Math.ceil(filteredData.length / rowsPerPage)`.
+3. Slice current page: `filteredData.slice((currentPage-1)*rowsPerPage, currentPage*rowsPerPage)`.
+4. Render cards for the sliced array.
+
+---
+
+## Edit / Delete Flows
+
+* **Navigation Requirement**: When clicking the **Edit** or **Delete** icons on a holiday card, the user must be navigated to dedicated pages:
+
+  * Edit → `/app/settings/holiday/edit.html?id={holidayId}`
+  * Delete → `/app/settings/holiday/delete.html?id={holidayId}`
+    These navigations should occur immediately on icon click before entering any inline edit/delete mode.
+
+---
+
+## Toasts
+
+* `createToast(message, type)` renders top-center toasts with green (`#16A34A`) for success and red (`#DC2626`) for error, auto-dismiss after 3s with fade animations.
+
+---
+
+## UX Details & Accessibility
+
+* Inputs and controls use clear labels, proper touch targets, and accessible aria attributes.
+* Tooltips via `title` attribute for disabled actions (e.g., "Cannot edit past holidays").
+* Backdrop/tap-to-close behavior for popovers.
+
+---
+
+## Implementation Notes
+
+* All localStorage reads/writes wrapped in `try/catch` with toasts on exceptions.
+* Dates stored in `localStorage` as `YYYY-MM-DD` strings.
+* Mobile layout reserves bottom padding to avoid content being hidden behind fixed pagination.
+* Console debug logs helpful events (edit, save, delete, filter changes).
 
 ---
 
 ## Output
 
-Produce a single self-contained HTML file (inline CSS + JS) implementing the above behavior and persisting data to `localStorage` under the keys `tempSuppliers` and `suppliers`.
+Produce a single self-contained HTML file with inline CSS and JavaScript that implements the Mobile Holiday Management View per the specification above.
 
----
-## Image
-<img src='./assets/Screenshot 2025-11-20 124824.png'>
-<img src='./assets/Screenshot 2025-11-20 125223.png'>
+## Sample Mock Data
+
+```js
+[
+  {
+    "id": "HLD-001",
+    "title": "New Year’s Day",
+    "type": "General",
+    "startDate": "2025-01-01",
+    "endDate": "2025-01-01",
+    "description": "National public holiday marking the start of the year",
+    "isActive": true
+  },
+  {
+    "id": "HLD-002",
+    "title": "Republic Day",
+    "type": "General",
+    "startDate": "2025-01-26",
+    "endDate": "2025-01-26",
+    "description": "Indian Republic Day celebration",
+    "isActive": true
+  },
+  {
+    "id": "HLD-003",
+    "title": "Good Friday",
+    "type": "General",
+    "startDate": "2025-04-18",
+    "endDate": "2025-04-18",
+    "description": "Christian religious holiday",
+    "isActive": true
+  },
+  {
+    "id": "HLD-004",
+    "title": "Eid al-Fitr",
+    "type": "Special",
+    "startDate": "2025-03-31",
+    "endDate": "2025-04-01",
+    "description": "Two-day special celebration at the end of Ramadan",
+    "isActive": true
+  },
+  {
+    "id": "HLD-005",
+    "title": "Labour Day",
+    "type": "General",
+    "startDate": "2025-05-01",
+    "endDate": "2025-05-01",
+    "description": "International Workers’ Day",
+    "isActive": true
+  },
+  {
+    "id": "HLD-006",
+    "title": "Onam",
+    "type": "Special",
+    "startDate": "2025-09-05",
+    "endDate": "2025-09-08",
+    "description": "Festival celebrated in Kerala",
+    "isActive": true
+  },
+  {
+    "id": "HLD-007",
+    "title": "Diwali",
+    "type": "Special",
+    "startDate": "2025-10-20",
+    "endDate": "2025-10-24",
+    "description": "Festival of lights",
+    "isActive": true
+  },
+  {
+    "id": "HLD-008",
+    "title": "Christmas",
+    "type": "General",
+    "startDate": "2025-12-25",
+    "endDate": "2025-12-25",
+    "description": "Christmas Day celebration",
+    "isActive": true
+  }
+]
+```

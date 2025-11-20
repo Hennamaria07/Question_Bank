@@ -1,7 +1,7 @@
-# Bug Fix — Paragraph Not Showing Length of Input
+# Bug Fix — Audio Not Playing
 ## Task
 
-Fix so typing shows live character count.
+Fix so clicking Play actually plays the audio.
 
 ## Buggy Code
 ``` html
@@ -9,13 +9,13 @@ Fix so typing shows live character count.
 <html>
 <body>
 
-<input id="text">
-<p id="len"></p>
+<audio id="audio" src="song.mp3"></audio>
+<button id="play">Play</button>
 
 <script>
-text.addEventListener("input", () => {
-    len.innerHTML = text.length;
-});
+document.getElementByID("play").click = () => {
+    audio.pla();
+}
 </script>
 
 </body>
