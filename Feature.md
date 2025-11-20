@@ -232,3 +232,8 @@ Produce a single self-contained HTML file with inline CSS and JavaScript that im
   }
 ]
 ```
+---
+## Image
+<img src='./assets/Screenshot 2025-11-20 125554.png'>
+<img src='./assets/Screenshot 2025-11-20 125608.png'>
+<img src='./assets/Screenshot 2025-11-20 125629.png'>
