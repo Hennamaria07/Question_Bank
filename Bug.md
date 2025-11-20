@@ -1,7 +1,7 @@
-# Bug Fix — Radio Button Not Detecting Correct Value
+# Bug Fix — Wrong Sum Calculated
 ## Task
 
-Fix the bug so selecting a radio button shows the chosen gender.
+Fix so sum of two inputs shows correctly.
 
 ## Buggy Code
 ``` html
@@ -9,16 +9,15 @@ Fix the bug so selecting a radio button shows the chosen gender.
 <html>
 <body>
 
-<input type="radio" name="g" value="Male"> Male
-<input type="radio" name="g" value="Female"> Female
-<p id="out"></p>
+<input id="a" type="number">
+<input id="b" type="number">
+<button id="sum">Sum</button>
+<p id="res"></p>
 
 <script>
-document.querySelectorAll("g").forEach(r => {
-    r.addEventListener("change", () => {
-        out.innerHTML = r.text;
-    });
-});
+document.getElementById("sum").onclick = () => {
+    res.innerHTML = a + b;
+}
 </script>
 
 </body>
