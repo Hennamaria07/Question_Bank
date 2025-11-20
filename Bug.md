@@ -1,21 +1,21 @@
-# Bug Fix — Background Color Picker Not Working
+# Bug Fix — Password Show/Hide Not Working
 ## Task
 
-Fix so picking a color updates box background.
+Fix so clicking the icon shows/hides the password.
 
 ## Buggy Code
-```html
+``` html 
 <!DOCTYPE html>
 <html>
 <body>
 
-<input type="color" id="picker">
-<div id="box" style="width:100px;height:100px;background:#ccc;"></div>
+<input id="pass" type="password">
+<button id="toggle">Show</button>
 
 <script>
-picker.addEventListener("input", () => {
-    box.backgroud = picker.value;
-});
+toggle.onclick = () => {
+    pass.type = pass.type === password ? "text" : "password";
+}
 </script>
 
 </body>

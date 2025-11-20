@@ -1,164 +1,170 @@
-# Mobile Mantual Cards 
-## Goal
+Here is your **clean, structured, production-ready README** for **Q1: Desktop Service Overview (Active Job Cards) – WITHOUT Workers Panel**.
 
-Create a **responsive, mobile-first card-based component** (single self-contained HTML file with inline CSS and vanilla JavaScript) that displays service/job-order records **only on screens ≤ 600px**. The component must include search, brand filter, pagination, and smooth mobile UX. All data is static and hardcoded (same dataset as the desktop version — 25+ job orders).
-
-## Data
-
-* Use a hardcoded array of **at least 25 job orders** inside the page. Each record must contain:
-
-  * `plateNo` (string)
-  * `brand` (string)
-  * `jobCardId` (string)
-  * `estDelivery` (ISO date string or formatted string)
-  * `advisor` (string)
-
-(You can reuse the 25-record dataset previously provided for the desktop table.)
+If you want, I can also generate the full `.html` page.
 
 ---
 
-## Visibility
+# 📘 Service Overview (Active Job Cards) — Desktop Version (≥901px)
 
-* The entire component is **hidden on screens > 600px** via CSS media queries. It is **visible only on mobile** (≤ 600px).
-
----
-
-## Layout & Styling
-
-* Page container: background `#F1F3F7`, padding `16px`, min-height `100vh`.
-* Card style:
-
-  * Background: white `#FFFFFF`
-  * Border-radius: `8px`
-  * Padding: `16px`
-  * Margin-bottom: `16px`
-  * Box-shadow: `1px 1px 1px rgba(197,197,197,1)`
-  * Tap-friendly (entire card clickable)
-* Text styles inside card:
-
-  * Plate No: bold, `font-size: 16px`
-  * Brand: gray secondary header, `font-size: 14px`, color `#757575`
-  * Job Card ID: small, `font-size: 13px`, prefix `ID:`
-  * Advisor: `font-size: 13px`, prefix `Advisor:`
-  * Est. Delivery Date: `font-size: 13px`, prefix `Est. Delivery Date:` and formatted like `16-Oct-2024`.
-* Active/selected states use purple accent `#2A00B2` for highlights and buttons.
+This document explains the layout, UI rules, behavior, and mock data for building the **Service Overview (Active Job Cards)** page using **only HTML, CSS, and JavaScript** as a **single self-contained file**.
+This version **removes the workers sidebar entirely** and adapts the layout accordingly.
 
 ---
 
-## Search
+## ✅ **1. Page Summary**
 
-* A mobile search bar sits at the top of the component (full-width):
+A **desktop-only** page (visible at **901px width and above**) showing job cards in a responsive grid. Clicking a card reveals a right-side slide-in panel with full job details.
 
-  * Height `44–48px`, white background, left search icon, placeholder **"Search Services..."**.
-  * Filters in real-time (no submit button). Debounced (200–250ms) for performance.
-  * Search fields: plateNo, brand, jobCardId, advisor (case-insensitive substring match).
-  * When search or filter changes, **reset pagination to page 1**.
+This page replicates the behavior of the React version **when the workers panel is disabled**.
 
 ---
 
-## Brand Filter Popover
+## 🎨 **2. Layout Requirements**
 
-* Filter button positioned at the top-right.
-* Clicking opens a slide-in popover/modal overlay with:
+### **2.1 Full Page Layout**
 
-  * White box, rounded corners `8px`, padding `16px`, shadow, and semi-transparent backdrop.
-  * Dropdown select for **Brand**: options include **All** + unique brands from the dataset.
-  * `Reset` button to clear the filter.
-  * `Close (X)` to dismiss.
-* While popover is open, **prevent body scrolling** (`document.body.style.overflow = 'hidden'`), restore on close.
-* Selecting a brand filters results immediately.
+* The page takes **100% viewport width** — no left sidebar.
+* Background color: **light grey `#F1F3F7`**.
+* Smooth animations (CSS transform + opacity).
 
----
+### **2.2 Header**
 
-## Pagination
-
-* Fixed bottom pagination bar (position fixed at bottom): background `#F1F3F7`, padding `12px`, box-shadow, z-index.
-* Shows current page / total pages (e.g. `1 / 3`) and Previous/Next arrow buttons.
-* **10 cards per page** from the currently filtered dataset.
-* Calculate `totalPages = Math.ceil(filtered.length / 10)`.
-* Controls:
-
-  * Previous (disabled on page 1)
-  * Next (disabled on last page)
-  * Display `pageNum / totalPages` in center
-* When search or filter changes, **reset to page 1** and recalc pages.
+* Full-width bar with dark blue **`#2652E0`** background.
+* Centered date with calendar icon.
+* Example:
+  **🗓 20 November**
 
 ---
 
-## Empty state
+## 📦 **3. Job Card Grid**
 
-* If no records match the current search/filter, show centered message:
+### **3.1 Grid Rules**
 
-  * **No records found** (bold)
-  * Secondary helper text (smaller, muted)
+* Responsive CSS grid:
 
----
-
-## Interactions
-
-* Clicking a card simulates navigation to service details (use `alert()` or `console.log()`):
-
-  ```js
-  alert('Navigate to: http://127.0.0.1:5500/dashboard/manual-time-entry/manual-time-add.html');
+  ```css
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   ```
-* All state (search query, selected brand, current page) is managed in-memory with JS variables.
-* Keep scroll position where sensible; however, when changing pages, scroll to top of the cards container for clarity.
+* Typically displays **3–4 cards per row**.
+* Gap between cards: **1em**.
+
+### **3.2 Card Style**
+
+* White background
+* `border-radius: 12px`
+* Padding: `16px`
+* Shadow: subtle soft shadow
+* On click:
+  **`filter: brightness(120%)`**
 
 ---
 
-## Accessibility & UX
+## 🟥 **4. Card Background Color Priority**
 
-* Tap targets ≥ 40px, readable contrast.
-* Keyboard-accessible controls where practical.
-* Smooth transitions for popover and pager.
+The color must strictly follow these rules:
+
+### **Highest Priority**
+
+1️⃣ **Overdue** → Estimated date/time already passed → **Red `#FF0000`**
+
+### **Otherwise based on status**
+
+| Status | Meaning            | Color                |
+| ------ | ------------------ | -------------------- |
+| 1      | New                | **Yellow `#FFFD00`** |
+| 2      | In Progress        | **Green `#7EF782`**  |
+| 3      | On Hold            | **Orange `#FF4E00`** |
+| 4      | Ready for Delivery | **Blue `#0000FF`**   |
+| Other  | Unknown            | **Gray `#808080`**   |
 
 ---
 
-## Implementation Notes
+## 🏷 **5. Card Content**
 
-* Provide the full implementation as a **single HTML file** with inline CSS and JavaScript.
-* Use vanilla JS only (no frameworks).
-* Debounce search input.
-* Store the initial dataset into `localStorage.jobOrders` on first run so data persists if desired.
-* Ensure all filtering and pagination operations are client-side and instantaneous.
+Each card displays:
+
+* **Plate Number (bold 20px + car icon)**
+* **Estimated delivery date/time**
+  Format: `DD-MM-YYYY, 3:30PM`
+* **List of active workers**, one per line
+  (Hide section if empty)
 
 ---
 
-## Example dataset snippet (use 25 records — expand as needed):
+## 📂 **6. Card Click → Slide-In Details Panel**
+
+Clicking a card triggers:
+
+### **6.1 Grid Shrinks**
+
+* Grid animates to **60–65% width**
+* Slides left using `transform`
+
+### **6.2 Details Panel (Right Side)**
+
+* Width: **35%**
+* Slides in from the right
+* Header background: **`#2652E0`**
+* Close button: white X on the left
+* Content area:
+
+  * Scrollable
+  * White background
+
+### **6.3 Panel Displays**
+
+* Plate number
+* VIN
+* Owner name
+* Contact number
+* Estimated delivery
+* Assigned workers
+* Jobs list
+* Parts ordered list
+* "View Job Card" link
+  → Shows `alert("Opening job card...")`
+
+---
+
+## 📱 **7. No Mobile Version**
+
+This file is **desktop only**.
+Hide everything above **600px** if needed, but mobile is not required here.
+
+---
+
+## 📚 **8. Dependencies**
+
+* **Font Awesome** (included via CDN)
+  Used for icons like car, calendar, close (X).
+
+---
+
+## 🧪 **9. Included Mock Data (16 job cards)**
+
+The file must include the **exact same dataset**:
 
 ```js
-[
-{"plate": "KL07AB1234", "brand": "Toyota", "jobCard": "JC-001", "estDelivery": "2025-01-12", "advisor": "John Mathew"},
-{"plate": "KL05CD5678", "brand": "Honda", "jobCard": "JC-002", "estDelivery": "2025-01-15", "advisor": "Anu George"},
-{"plate": "KL22EF9821", "brand": "Ford", "jobCard": "JC-003", "estDelivery": "2025-01-18", "advisor": "Rahul Nair"},
-{"plate": "KL10GH4432", "brand": "Hyundai", "jobCard": "JC-004", "estDelivery": "2025-01-20", "advisor": "Sneha Jose"},
-{"plate": "KL03JK2211", "brand": "Kia", "jobCard": "JC-005", "estDelivery": "2025-01-22", "advisor": "Vishnu Lal"},
-{"plate": "KL15LM3344", "brand": "Mahindra", "jobCard": "JC-006", "estDelivery": "2025-01-25", "advisor": "Deepa Varma"},
-{"plate": "KL08NP7788", "brand": "Tata", "jobCard": "JC-007", "estDelivery": "2025-01-26", "advisor": "Joseph Paul"},
-{"plate": "KL40QR1299", "brand": "Suzuki", "jobCard": "JC-008", "estDelivery": "2025-01-28", "advisor": "Linda Maria"},
-{"plate": "KL11ST4455", "brand": "Toyota", "jobCard": "JC-009", "estDelivery": "2025-02-01", "advisor": "Hari Mohan"},
-{"plate": "KL29UV6677", "brand": "Honda", "jobCard": "JC-010", "estDelivery": "2025-02-03", "advisor": "Amal Roy"},
-{"plate": "KL17WX8899", "brand": "Ford", "jobCard": "JC-011", "estDelivery": "2025-02-05", "advisor": "Sana Biju"},
-{"plate": "KL12YZ1122", "brand": "Hyundai", "jobCard": "JC-012", "estDelivery": "2025-02-07", "advisor": "Kevin Thomas"},
-{"plate": "KL06AA3344", "brand": "Kia", "jobCard": "JC-013", "estDelivery": "2025-02-10", "advisor": "Alwin James"},
-{"plate": "KL19BB5566", "brand": "Mahindra", "jobCard": "JC-014", "estDelivery": "2025-02-12", "advisor": "Riya Cherian"},
-{"plate": "KL13CC7788", "brand": "Tata", "jobCard": "JC-015", "estDelivery": "2025-02-14", "advisor": "Dileep P"},
-{"plate": "KL02DD9900", "brand": "Suzuki", "jobCard": "JC-016", "estDelivery": "2025-02-16", "advisor": "Nikhil Das"},
-{"plate": "KL20EE2211", "brand": "Toyota", "jobCard": "JC-017", "estDelivery": "2025-02-18", "advisor": "Sharon V"},
-{"plate": "KL14FF4433", "brand": "Honda", "jobCard": "JC-018", "estDelivery": "2025-02-20", "advisor": "Julie Thomas"},
-{"plate": "KL09GG6655", "brand": "Ford", "jobCard": "JC-019", "estDelivery": "2025-02-22", "advisor": "Mathew Jose"},
-{"plate": "KL28HH8877", "brand": "Hyundai", "jobCard": "JC-020", "estDelivery": "2025-02-24", "advisor": "Sandra Paul"},
-{"plate": "KL34II9988", "brand": "Kia", "jobCard": "JC-021", "estDelivery": "2025-02-27", "advisor": "Freddy K"},
-{"plate": "KL04JJ1100", "brand": "Mahindra", "jobCard": "JC-022", "estDelivery": "2025-03-01", "advisor": "Merin John"},
-{"plate": "KL23KK3322", "brand": "Tata", "jobCard": "JC-023", "estDelivery": "2025-03-04", "advisor": "Joel Antony"},
-{"plate": "KL33LL5544", "brand": "Suzuki", "jobCard": "JC-024", "estDelivery": "2025-03-06", "advisor": "Rose Alex"},
-{"plate": "KL26MM7766", "brand": "Toyota", "jobCard": "JC-025", "estDelivery": "2025-03-08", "advisor": "Rahul KP"}
-]
+const jobCards = [
+  { id: "1", jobCardNumber: "JC-2025-0001", plateNumber: "ABC 123 GP", vin: "1HGBH41JXMN109186", ownerName: "Thabo Mokoena", contact: "082 555 0192", estimatedDate: "2025-11-18", estimatedTime: "10:00 AM", status: 2, activeWorkers: ["Sipho Zulu", "Lerato Ndlovu"], jobs: ["Oil Change", "Brake Inspection"], parts: [{name: "Oil Filter", qty: 1}, {name: "Engine Oil 5W30", qty: 5}] },
+  { id: "2", jobCardNumber: "JC-2025-0002", plateNumber: "XYZ 789 GP", vin: "2HGES16572H599872", ownerName: "Sarah Johnson", contact: "071 234 5678", estimatedDate: "2025-11-20", estimatedTime: "2:30 PM", status: 1, activeWorkers: [], jobs: ["Diagnostics", "AC Service"], parts: [] },
+  { id: "3", jobCardNumber: "JC-2025-0003", plateNumber: "ND 456789", vin: "JH4KA9650XC000123", ownerName: "Mike van der Merwe", contact: "083 777 8888", estimatedDate: "2025-11-15", estimatedTime: "11:00 AM", status: 2, activeWorkers: ["James Mthembu"], jobs: ["Suspension Repair"], parts: [{name: "Shock Absorber", qty: 2}] },
+  { id: "4", jobCardNumber: "JC-2025-0004", plateNumber: "TAXI 001", vin: "5FNRL38728B401234", ownerName: "David Khumalo", contact: "076 111 2233", estimatedDate: "2025-11-20", estimatedTime: "4:00 PM", status: 4, activeWorkers: ["Peter Dlamini"], jobs: ["Full Service"], parts: [{name: "Air Filter", qty: 1}, {name: "Spark Plugs", qty: 4}] },
+  { id: "5", jobCardNumber: "JC-2025-0005", plateNumber: "GP 987 ZZZ", vin: "1FAFP4040YF123456", ownerName: "Nomsa Nkosi", contact: "081 555 1212", estimatedDate: "2025-11-19", estimatedTime: null, status: 3, activeWorkers: [], jobs: ["Waiting for Parts"], parts: [] },
+  { id: "6", jobCardNumber: "JC-2025-0006", plateNumber: "BMW 530i", vin: "WBANB3330XCN12345", ownerName: "Dr. Pieter Botha", contact: "082 999 0001", estimatedDate: "2025-11-21", estimatedTime: "9:00 AM", status: 1, activeWorkers: [], jobs: ["Software Update"], parts: [] },
+  { id: "7", jobCardNumber: "JC-2025-0007", plateNumber: "CA 123456", vin: "KL1TF56609B123456", ownerName: "Fatima Patel", contact: "072 888 7777", estimatedDate: "2025-11-17", estimatedTime: "3:00 PM", status: 2, activeWorkers: ["Thandi Mokoena", "Sibusiso Ngubane"], jobs: ["Transmission Service"], parts: [{name: "Transmission Fluid", qty: 8}] },
+  { id: "8", jobCardNumber: "JC-2025-0008", plateNumber: "JHB 555 GP", vin: "1G1YY22G0W5101234", ownerName: "Lucas Ferreira", contact: "084 555 6666", estimatedDate: "2025-11-20", estimatedTime: "11:30 AM", status: 2, activeWorkers: ["Moses Chabalala"], jobs: ["Wheel Alignment"], parts: [] },
+  { id: "9", jobCardNumber: "JC-2025-0009", plateNumber: "NDL 777 NW", vin: "JTEBU5JR0K5678901", ownerName: "Kgomotso Molefe", contact: "079 111 2222", estimatedDate: "2025-11-16", estimatedTime: "1:00 PM", status: 1, activeWorkers: [], jobs: ["Major Service"], parts: [{name: "Timing Belt Kit", qty: 1}] },
+  { id: "10", jobCardNumber: "JC-2025-0010", plateNumber: "POLO GP", vin: "WVWZZZ9NZ9Y123456", ownerName: "Zanele Mthethwa", contact: "073 999 8888", estimatedDate: "2025-11-20", estimatedTime: "5:00 PM", status: 4, activeWorkers: ["Gift Mabunda"], jobs: ["Clutch Replacement"], parts: [{name: "Clutch Kit", qty: 1}] },
+  { id: "11", jobCardNumber: "JC-2025-0011", plateNumber: "LUX 001 GP", vin: "SALFA2D46BA123456", ownerName: "Mr. Singh", contact: "082 333 4444", estimatedDate: "2025-11-14", estimatedTime: "10:00 AM", status: 2, activeWorkers: ["Isaac Mokoena", "Reggie Phiri"], jobs: ["Engine Overhaul"], parts: [{name: "Head Gasket", qty: 1}, {name: "Pistons", qty: 6}] },
+  { id: "12", jobCardNumber: "JC-2025-0012", plateNumber: "TIG 222 FS", vin: "ADTJVN12345678901", ownerName: "Maria da Silva", contact: "081 777 9999", estimatedDate: "2025-11-20", estimatedTime: null, status: 1, activeWorkers: [], jobs: ["Pre-Roadworthy"], parts: [] },
+  { id: "13", jobCardNumber: "JC-2025-0013", plateNumber: "FIESTA 1", vin: "3FADP4EJ9KM123456", ownerName: "Tebogo Radebe", contact: "076 444 5555", estimatedDate: "2025-11-19", estimatedTime: "12:00 PM", status: 3, activeWorkers: [], jobs: ["Waiting Approval"], parts: [] },
+  { id: "14", jobCardNumber: "JC-2025-0014", plateNumber: "KIA 888 KZN", vin: "KNAFE222695123456", ownerName: "Bongani Zungu", contact: "083 222 3333", estimatedDate: "2025-11-20", estimatedTime: "3:00 PM", status: 2, activeWorkers: ["Lucky Mabaso"], jobs: ["Brake Pads & Discs"], parts: [{name: "Brake Pads Front", qty: 1}, {name: "Brake Discs", qty: 2}] },
+  { id: "15", jobCardNumber: "JC-2025-0015", plateNumber: "MERC 63", vin: "WDDHF8JB0EB123456", ownerName: "Ahmed Khan", contact: "082 111 9999", estimatedDate: "2025-11-20", estimatedTime: "10:00 AM", status: 4, activeWorkers: ["Victor Ndlovu"], jobs: ["Service A"], parts: [{name: "Synthetic Oil", qty: 8}] },
+  { id: "16", jobCardNumber: "JC-2025-0016", plateNumber: "RANGER GP", vin: "1FTER4FH1KLE12345", ownerName: "Jaco Pretorius", contact: "084 777 8888", estimatedDate: "2025-11-18", estimatedTime: "4:00 PM", status: 2, activeWorkers: ["Themba Mkhize", "Sello Ramaphosa"], jobs: ["Turbo Replacement"], parts: [{name: "Turbocharger", qty: 1}] }
+];
 ```
 
 ---
 ## Image
-<img src='./assets/Screenshot 2025-11-20 142455.png'>
-<img src='./assets/Screenshot 2025-11-20 142428.png'>
-<img src='./assets/Screenshot 2025-11-20 142524.png'>
-
+<img src='./assets/Screenshot 2025-11-20 145245.png'>
