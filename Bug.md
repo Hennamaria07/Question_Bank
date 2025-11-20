@@ -1,7 +1,7 @@
-# Bug Fix — Div Height Animation Not Working
+# Bug Fix — Text Not Reversing
 ## Task
 
-Fix so clicking grows div height by animation.
+Fix so clicking reverses the input string.
 
 ## Buggy Code
 ```html
@@ -9,12 +9,13 @@ Fix so clicking grows div height by animation.
 <html>
 <body>
 
-<div id="box" style="width:100px;height:50px;background:orange;transition:height 0.5s;"></div>
-<button id="grow">Grow</button>
+<input id="txt">
+<button id="rev">Reverse</button>
+<p id="out"></p>
 
 <script>
-grow.onclick = () => {
-    box.hight = "200px";
+rev.onclick = () => {
+    out.innerHTML = txt.value.split("").reverse.join("");
 }
 </script>
 
