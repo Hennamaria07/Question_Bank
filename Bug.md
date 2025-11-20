@@ -4,7 +4,7 @@
 Fix the bug where clicking "Disable" should disable the button.
 
 ## Buggy Code
-```html
+``` html
 <!DOCTYPE html>
 <html>
 <body>
