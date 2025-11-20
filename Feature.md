@@ -1,4 +1,4 @@
-# README — Login & Password Reset (Single-file HTML)
+# Login & Password Reset (Single-file HTML)
 
 **Project:** Self-contained Login & Password Reset page
 **Files:** Single HTML file (pure HTML, CSS, vanilla JavaScript)
