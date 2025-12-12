@@ -14,7 +14,7 @@ Fix so digital clock shows correct current time every second.
 <script>
 setInterval(() => {
     let now = new Date();
-    clock.innerHTML = now.getHours + ":" + now.getMinutes();
+    clock.innerHTML = now.getHours() + ":" + now.getMinutes();
 }, 1000)
 </script>
 
